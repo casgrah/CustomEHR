@@ -1,0 +1,803 @@
+<meta charset="utf-8">
+<title>Group Note Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+
+<style>
+  :root {
+    --chrome:#0A4767; --chrome-hi:#0F6690; --chrome-ink:#DDEDF7; --chrome-dim:#94BFD9;
+    --ground:#E9EAEC; --surface:#FFFFFF; --surface-2:#F2F3F5; --surface-3:#E3E5E9;
+    --ink:#13161A; --ink-soft:#4E555E; --ink-faint:#79818B;
+    --line:#D5D8DD; --line-strong:#A9AEB6;
+    --accent:#0A6893; --accent-soft:#DCEFFA;
+    --alert:#9C2317; --alert-soft:#FBE2DF; --warn:#875204; --warn-soft:#FAEDD4;
+    --good:#1C6741; --good-soft:#DDEFE4;
+    --shadow:0 1px 2px rgba(19,22,26,.08), 0 2px 10px rgba(19,22,26,.05);
+    --fs:14px; --fs-sm:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+      --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+      --line:#2F343A; --line-strong:#454C54;
+      --accent:#6BBEE8; --accent-soft:#12303F;
+      --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+      --good:#6FC094; --good-soft:#1B2E24;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+    --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+    --line:#2F343A; --line-strong:#454C54;
+    --accent:#6BBEE8; --accent-soft:#12303F;
+    --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+    --good:#6FC094; --good-soft:#1B2E24;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+  }
+
+  *,*::before,*::after { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    font-size:var(--fs); line-height:1.55; -webkit-font-smoothing:antialiased; padding-bottom:112px;
+  }
+  a { color:var(--accent); }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline:2px solid var(--accent); outline-offset:2px; border-radius:3px;
+  }
+  .mono { font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 18px; }
+  .k { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-bottom:5px; }
+  .sub { color:var(--ink-soft); font-size:var(--fs-sm); }
+
+  .demonote { font-size:var(--fs-sm); color:var(--ink-faint); font-style:italic; margin:8px 0 0; }
+  .demonote::before { content:"demo note — "; font-style:normal; font-weight:700; letter-spacing:.05em; font-size:10px; text-transform:uppercase; }
+  body.clean .demonote { display:none !important; }
+
+  .bar { background:var(--surface-3); border-bottom:1px solid var(--line-strong); padding:8px 0; font-size:12.5px; }
+  .bar .wrap { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; }
+  .bar b { color:var(--ink); }
+  .seg2 { display:flex; border:1px solid var(--line-strong); border-radius:5px; overflow:hidden; }
+  .seg2 button { font-family:inherit; font-size:12.5px; background:var(--surface); color:var(--ink-soft);
+    border:0; border-right:1px solid var(--line); padding:5px 11px; cursor:pointer; }
+  .seg2 button:last-child { border-right:0; }
+  .seg2 button[aria-pressed="true"] { background:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+
+  /* ---------- sticky chrome ---------- */
+  .sticky { position:sticky; top:0; z-index:30; }
+  .idbar { background:var(--chrome); color:var(--chrome-ink); padding:13px 0 12px; }
+  .idbar .wrap { display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; }
+  .idbar h1 { font-family:"Source Serif 4",Georgia,serif; font-size:21px; font-weight:700;
+    margin:0; letter-spacing:-.015em; line-height:1.2; color:#fff; }
+  :root[data-theme="dark"] .idbar h1, :root:not([data-theme="light"]) .idbar h1 { color:var(--chrome-ink); }
+  .facts { display:flex; flex-wrap:wrap; gap:5px 14px; font-size:var(--fs-sm); color:var(--chrome-dim); align-items:center; }
+  .facts b { color:var(--chrome-ink); font-weight:500; }
+  .chip { display:inline-block; padding:2px 9px; border-radius:3px; font-size:10.5px; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase; background:var(--chrome-hi); color:var(--chrome-ink);
+    border:1px solid rgba(255,255,255,.18); }
+  .chip.svc { background:#7ED0F5; color:#06344A; border-color:transparent; }
+  .chip.draft { background:#B5760A; color:#fff; border-color:transparent; }
+  .gtime { display:flex; gap:7px; align-items:center; margin-left:auto; }
+  .gtime input { font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:4px 7px;
+    border-radius:4px; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.95); color:#0A2331; }
+  .gtime .lbl { font-size:9.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--chrome-dim); }
+
+  .strip { background:var(--alert); color:#fff; padding:8px 0; font-size:var(--fs-sm); }
+  .strip .wrap { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+  .strip .t { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.9; }
+  .strip a { color:#fff; font-weight:600; }
+
+  main { padding:18px 0 30px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:14px; }
+  .card > h2 { margin:0; padding:11px 18px; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-soft); border-bottom:1px solid var(--line); background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .card > h2 .n { font-size:11px; letter-spacing:0; text-transform:none; font-weight:500; }
+  .card .body { padding:18px; }
+  .fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px 16px; }
+  .tags { display:flex; flex-wrap:wrap; gap:6px; }
+  .tags span { font-size:var(--fs-sm); padding:3px 10px; border-radius:20px; background:var(--accent-soft); color:var(--accent); font-weight:500; }
+
+  textarea, input[type=text], select {
+    font-family:inherit; font-size:var(--fs); color:var(--ink); background:var(--surface);
+    border:1px solid var(--line-strong); border-radius:4px; padding:9px 11px; width:100%; line-height:1.5;
+  }
+  textarea { resize:vertical; min-height:74px; }
+
+  /* ---------- client cards ---------- */
+  .cli { background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden; }
+  .cli.flag { border-color:var(--alert); }
+  .cli .top { display:flex; gap:13px; align-items:center; padding:13px 16px; background:var(--surface-2);
+    border-bottom:1px solid var(--line); }
+  .avatar { width:44px; height:44px; border-radius:50%; flex:0 0 44px; overflow:hidden;
+    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--line-strong); }
+  .cli .who { flex:1 1 200px; min-width:0; }
+  .cli .who .nm { font-weight:700; font-size:15px; }
+  .cli .who .mrn { color:var(--ink-faint); font-size:var(--fs-sm); }
+  .cli .rt { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+  .rmv { background:none; border:1px solid var(--line-strong); color:var(--ink-faint); cursor:pointer;
+    width:28px; height:28px; border-radius:4px; font-size:15px; line-height:1; }
+  .rmv:hover { border-color:var(--alert); color:var(--alert); }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+  .tag.ok { background:var(--good-soft); color:var(--good); }
+  .tag.warn { background:var(--warn-soft); color:var(--warn); }
+  .tag.bad { background:var(--alert-soft); color:var(--alert); }
+  .tag.mute { background:var(--surface-3); color:var(--ink-soft); }
+  .tag.info { background:var(--accent-soft); color:var(--accent); }
+
+  .inflag { background:var(--alert-soft); border-bottom:1px solid var(--alert); padding:10px 16px;
+    font-size:var(--fs-sm); color:var(--ink); display:flex; flex-wrap:wrap; gap:6px 12px; align-items:baseline; }
+  .inflag .t { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--alert); }
+  .cli.locked .cbody { opacity:.72; }
+  .cli.locked textarea, .cli.locked select, .cli.locked input { pointer-events:none; background:var(--surface-2); }
+  .cli.locked .plus, .cli.locked .ochip .x, .cli.locked .rmv, .cli.locked .rm { display:none; }
+  .cli.late { border-color:var(--warn); border-width:2px; }
+  .latebar { background:var(--warn-soft); border-bottom:1px solid var(--warn); padding:10px 16px;
+    font-size:var(--fs-sm); display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+  .latebar .t { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--warn); }
+  .lockbar { background:var(--surface-3); border-bottom:1px solid var(--line); padding:7px 16px;
+    font-size:11.5px; color:var(--ink-soft); display:flex; gap:9px; align-items:center; }
+  .inflag.fixed { background:var(--good-soft); border-bottom-color:var(--good); }
+  .inflag.fixed .t { color:var(--good); }
+  .inflag .dismiss { margin-left:auto; background:none; border:0; color:var(--ink-faint); cursor:pointer;
+    font-size:15px; line-height:1; padding:0 3px; }
+  .cli.fixed { border-color:var(--good); }
+
+  .cbody { padding:15px 16px 16px; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; align-items:start; }
+  @media (max-width:900px) { .cbody { grid-template-columns:1fr; } }
+
+  .chips { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .ochip { display:inline-flex; align-items:center; gap:7px; background:var(--accent-soft); color:var(--accent);
+    border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:4px;
+    padding:4px 9px; font-size:var(--fs-sm); font-weight:500; max-width:100%; }
+  .ochip .id { font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:11px; }
+  .ochip .x { cursor:pointer; font-weight:700; opacity:.65; }
+  .ochip .x:hover { opacity:1; }
+  .plus { background:var(--surface); border:1px dashed var(--line-strong); color:var(--ink-soft);
+    border-radius:4px; padding:4px 11px; font-size:var(--fs-sm); font-family:inherit; cursor:pointer; font-weight:600; }
+  .plus:hover { border-color:var(--accent); color:var(--accent); }
+
+  .pop { position:relative; display:inline-block; }
+  .pop .sheet { display:none; position:absolute; left:0; top:calc(100% + 6px); z-index:25; width:430px;
+    max-width:80vw; background:var(--surface); border:1px solid var(--line-strong); border-radius:5px;
+    box-shadow:0 8px 26px rgba(0,0,0,.18); overflow:hidden; }
+  .pop.on .sheet { display:block; }
+  .pop .sheet .hd { padding:7px 12px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; background:var(--surface-2); border-bottom:1px solid var(--line); }
+  .pop .sheet button { display:block; width:100%; text-align:left; font-family:inherit; font-size:var(--fs-sm);
+    padding:9px 12px; background:var(--surface); border:0; border-top:1px solid var(--line); cursor:pointer; color:var(--ink); }
+  .pop .sheet button:first-of-type { border-top:0; }
+  .pop .sheet button:hover { background:var(--accent-soft); }
+  .pop .sheet button .id { font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:10.5px; color:var(--ink-faint); display:block; }
+  .pop .sheet button[disabled] { opacity:.4; cursor:default; }
+
+  .timerow { display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin-bottom:6px; }
+  .timerow .lab { font-size:11px; color:var(--ink-faint); width:66px; flex:0 0 66px; }
+  .timerow input[type=time] { font-family:"IBM Plex Mono",monospace; font-size:13px; padding:5px 7px;
+    border:1px solid var(--line-strong); border-radius:4px; background:var(--surface); color:var(--ink); }
+  .timerow .rm { background:none; border:0; color:var(--ink-faint); cursor:pointer; font-size:15px; padding:0 3px; }
+  .side .box { border:1px solid var(--line); border-radius:4px; padding:11px 12px; background:var(--surface-2); }
+  .tot { font-weight:700; }
+
+  .addcli { width:100%; padding:13px; border:1px dashed var(--line-strong); background:var(--surface);
+    border-radius:5px; color:var(--ink-soft); font-family:inherit; font-size:var(--fs); font-weight:600; cursor:pointer; }
+  .addcli:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ---------- sign bar ---------- */
+  .signbar { position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--surface);
+    border-top:2px solid var(--line-strong); box-shadow:0 -3px 14px rgba(0,0,0,.09); }
+  .signbar .wrap { display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; padding:12px 18px; }
+  .signbar .status { flex:1 1 340px; min-width:0; font-size:var(--fs-sm); }
+  .signbar .status b { display:block; font-size:var(--fs); margin-bottom:2px; }
+  .btn { font-family:inherit; font-size:var(--fs); font-weight:600; padding:10px 20px; border-radius:5px;
+    cursor:pointer; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  :root[data-theme="dark"] .btn.primary, :root:not([data-theme="light"]) .btn.primary { color:#06222F; }
+  .btn.primary[disabled] { background:var(--surface-3); border-color:var(--line-strong); color:var(--ink-faint); cursor:not-allowed; }
+  .btn.small { font-size:var(--fs-sm); padding:6px 13px; font-weight:500; }
+  .prompt { display:none; border-top:1px solid var(--line); background:var(--warn-soft); }
+  .prompt.on { display:block; }
+  .prompt .wrap { padding:13px 18px; display:block; }
+  .prompt h3 { margin:0 0 5px; font-size:var(--fs); color:var(--warn); }
+  .prompt p { margin:0 0 11px; font-size:var(--fs-sm); max-width:84ch; }
+  .prompt label { display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-sm); margin-bottom:11px; cursor:pointer; }
+
+  .done { display:none; } .done.on { display:block; }
+  .ev { display:flex; gap:12px; align-items:baseline; padding:9px 18px; border-top:1px solid var(--line); font-size:var(--fs-sm); }
+  .ev:first-child { border-top:0; }
+  .ev .w { flex:1; } .ev .w b { font-size:var(--fs); }
+
+  footer { padding:22px 0 40px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--line); background:var(--surface-2); }
+  footer p { margin:0 0 7px; max-width:82ch; } footer b { color:var(--ink-soft); }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <b>View</b>
+    <div class="seg2" role="group" aria-label="Annotations">
+      <button type="button" data-v="annotated" aria-pressed="true">With demo notes</button>
+      <button type="button" data-v="clean" aria-pressed="false">Clean</button>
+    </div>
+    <span class="sub">Annotations are scaffolding for review, not product copy.</span>
+  </div>
+</div>
+
+<div class="sticky">
+  <header class="idbar">
+    <div class="wrap">
+      <div>
+        <h1>Relapse Prevention</h1>
+        <div class="facts" style="margin-top:5px;">
+          <span class="chip svc">PHP · S0201</span>
+          <span class="chip draft" id="statechip">Draft</span>
+          <span>Wed <b class="mono">08/19/2026</b></span>
+          <span>Reyes, CSAC</span>
+          <span>Bldg B · Rm 2</span>
+          <span>Roster <b class="mono" id="rostercount">6</b>/12</span>
+        </div>
+      </div>
+      <div class="gtime">
+        <span class="lbl">Group time</span>
+        <input type="time" id="gstart" value="09:00">
+        <span style="color:var(--chrome-dim)">–</span>
+        <input type="time" id="gend" value="10:30">
+        <button class="btn small" type="button" id="applytime">Apply to all</button>
+      </div>
+    </div>
+  </header>
+  <div class="strip" id="strip">
+    <div class="wrap">
+      <span class="t">Overlap</span>
+      <span id="stripmsg"></span>
+      <a href="#" id="jump">Go to entry ↓</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="card">
+    <h2>Group details <span class="n">Written once — appears in every client's chart</span></h2>
+    <div class="body">
+      <div class="fields" style="margin-bottom:15px;">
+        <div><div class="k">Curriculum</div><div>Relapse Prevention — Session 8 of 12</div></div>
+        <div><div class="k">Modality</div><div>Psychoeducational group</div></div>
+        <div><div class="k">Co-facilitator</div><div class="sub">None</div></div>
+        <div><div class="k">Scheduled</div><div class="mono" id="scheduled">9:00 AM – 10:30 AM · 90 min</div></div>
+      </div>
+      <div class="k">Topic &amp; interventions</div>
+      <textarea>Group examined personal relapse warning signs using the three-stage model (emotional, mental, physical). Members mapped their own early indicators onto a timeline and identified which stage they typically recognize first. Facilitator introduced the distinction between a lapse and a relapse and normalized the role of planning over willpower. Group processed two member-generated scenarios involving unexpected contact with people from active use.</textarea>
+      <div class="tags" style="margin-top:11px;">
+        <span>Psychoeducation</span><span>Motivational interviewing</span>
+        <span>Cognitive restructuring</span><span>Group process</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="k" style="margin:20px 0 9px;">Client entries — <span id="progresslabel"></span></div>
+  <div id="roster"></div>
+  <div class="pop" id="censuspop" style="display:block;">
+    <button class="addcli" type="button" id="addcli">+ Add client to roster</button>
+    <span class="sheet" id="censussheet"></span>
+  </div>
+
+  <div class="card done" id="donecard" style="margin-top:16px;">
+    <h2>Signed <span class="n" id="retractclock"></span></h2>
+    <div class="body">
+      <p style="margin:0 0 6px"><b>Signed by Dana Reyes, CSAC — 08/19/2026, 4:12 PM.</b></p>
+      <p class="sub" style="margin:0 0 13px" id="settlemsg"></p>
+      <div id="retractbox">
+        <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center;">
+          <button class="btn small" type="button" id="unsignbtn">Retract signature</button>
+          <span class="sub">Same signer. Reason required. Everything is logged.</span>
+        </div>
+        <div id="reasonbox" style="display:none; margin-top:12px;">
+          <div class="k">Reason for retraction</div>
+          <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px;" id="reasons">
+            <button class="btn small" type="button" data-r="Wrong service time entered">Wrong service time</button>
+            <button class="btn small" type="button" data-r="Signed before entry was finished">Signed too early</button>
+            <button class="btn small" type="button" data-r="Roster correction needed">Roster correction</button>
+            <button class="btn small" type="button" data-r="Content error in entry">Content error</button>
+          </div>
+          <div style="display:flex; gap:9px; flex-wrap:wrap;">
+            <button class="btn primary small" type="button" id="confirmunsign" disabled>Retract &amp; reopen</button>
+            <button class="btn small" type="button" id="cancelunsign">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <p class="demonote">Nothing downstream fires during the window — no claim, no supervisor routing.
+        That is what makes retraction free instead of something the system has to block.</p>
+    </div>
+  </div>
+
+  <div class="card" id="qabox" style="display:none;">
+    <h2>Roster changes after signature <span class="n">QA / billing reconciliation</span></h2>
+    <div class="body">
+      <p style="margin:0 0 12px" id="lateline"></p>
+      <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center;">
+        <button class="btn small" type="button" id="unlockall">Unlock entire note (QA)</button>
+        <span class="sub">Unlocks the parent and <b id="qacount">6</b> entries — everyone, including
+          anyone added later. A full unlock is a full unlock.</span>
+      </div>
+      <p class="demonote">Adding someone weeks later is normal — it surfaces in billing reconciliation,
+        long past any retraction window. It only works because each client entry is a real record with
+        its own signature state, not a paragraph inside one document.</p>
+    </div>
+  </div>
+
+  <div class="card done" id="auditcard">
+    <h2>Signature history</h2>
+    <div id="auditlist"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>Throwaway prototype.</b> Fictional clients, invented data. Avatars are generated placeholders.</p>
+    <p><b>Try:</b> link an objective for Petrov to unblock signing · split Nguyen's time to clear the
+      overlap · remove someone from the roster · change the group time and apply to all · sign, then retract.</p>
+  </div>
+</footer>
+
+<div class="signbar">
+  <div class="prompt" id="prompt">
+    <div class="wrap">
+      <h3>Overlap acknowledgment required</h3>
+      <p id="promptbody"></p>
+      <label><input type="checkbox" id="ack">
+        <span>I have reviewed the overlap and confirm this note accurately reflects the time services
+          were delivered.</span></label>
+      <div style="display:flex; gap:9px; flex-wrap:wrap;">
+        <button class="btn primary small" type="button" id="confirmsign" disabled>Sign anyway</button>
+        <button class="btn small" type="button" id="cancelsign">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="status" id="signstatus"></div>
+    <button class="btn primary" type="button" id="signbtn">Sign group note</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var COMP = [
+    { id:'OBJ-1', t:'Identify and apply two coping strategies during craving episodes without substance use.' },
+    { id:'OBJ-2', t:'Attend three recovery support meetings weekly and document the experience.' },
+    { id:'OBJ-3', t:'Describe personal relapse warning signs and the stage at which they are first noticed.' },
+    { id:'OBJ-4', t:'Rebuild one supportive family relationship through structured contact.' }
+  ];
+  var INIT = [
+    { id:'INI-1', t:'Engage in scheduled programming and establish an early recovery routine.' },
+    { id:'INI-2', t:'Complete comprehensive assessment and participate in treatment planning.' },
+    { id:'INI-3', t:'Maintain abstinence and report cravings or use to the treatment team.' }
+  ];
+  var PART = ['Active','Engaged','Minimal','Disruptive','Observed only','Absent'];
+  var HUES = ['#3D6E8C','#7A5C86','#2F6B5B','#8A5B3A','#4A5A8C','#7C4B57'];
+
+  var clients = [
+    { id:'c1', n:'Whitfield, Marcus D.', mrn:'004821', present:true, isp:'comprehensive',
+      segs:[['09:00','09:30'],['10:00','10:30']], part:'Active', sel:['OBJ-1','OBJ-3'],
+      note:'Mapped his own warning-sign timeline and named irritability and isolating as earliest indicators. Left at 9:30 for a scheduled individual session and returned at 10:00, re-engaging without prompting.' },
+    { id:'c2', n:'Alvarez, Rosa M.', mrn:'004903', present:true, isp:'comprehensive',
+      segs:[['09:00','10:30']], part:'Engaged', sel:['OBJ-3'],
+      note:'Volunteered a scenario involving a former partner and worked it through with the group. Named avoidance as her default and identified one alternative response.' },
+    { id:'c3', n:'Petrov, Yuri', mrn:'004776', present:true, isp:'comprehensive',
+      segs:[['09:00','10:30']], part:'Minimal', sel:[],
+      note:'Present throughout, participated when directly invited. Declined to share a personal example.' },
+    { id:'c4', n:'Nguyen, Thao', mrn:'005011', present:true, isp:'comprehensive', overlap:true,
+      segs:[['09:00','10:30']], part:'Active', sel:['OBJ-1'],
+      note:'Contributed to the lapse-versus-relapse discussion and connected it to her own experience in April.' },
+    { id:'c5', n:'Carter, Denise', mrn:'004698', present:false, isp:'comprehensive',
+      segs:[], part:'Absent', sel:['OBJ-2'],
+      note:'Did not attend. Outreach call placed by case management at 9:20; no answer, voicemail left.' },
+    { id:'c6', n:'Okafor, James', mrn:'004955', present:true, isp:'initial',
+      segs:[['09:15','10:30']], part:'Active', sel:['INI-1'],
+      note:'Arrived 15 minutes late due to transportation. Engaged fully once settled; identified physical-stage warning signs he had not previously named.' }
+  ];
+
+  var signed=false, settling=false, released=false, left=0, ticker=null, audit=[], reason='', openPop=null;
+  var roster=document.getElementById('roster');
+  var gs=document.getElementById('gstart'), ge=document.getElementById('gend');
+  gs.dataset.prev=gs.value; ge.dataset.prev=ge.value;
+
+  function mins(t){ var p=t.split(':'); return (+p[0])*60+(+p[1]); }
+  function fmt(t){ var p=t.split(':'), h=+p[0], ap=h>=12?'PM':'AM'; return (h%12||12)+':'+p[1]+' '+ap; }
+  function hrs(c){ return (c.segs.reduce(function(s,g){return s+(mins(g[1])-mins(g[0]));},0)/60).toFixed(2); }
+  function list(c){ return c.isp==='initial'?INIT:COMP; }
+  function byId(id){ return clients.filter(function(c){return c.id===id;})[0]; }
+  function inc(c){ return c.sel.length===0; }
+  function ov(c){
+    if(!c.overlap) return false;
+    var a=mins('09:30'), b=mins('10:00');
+    return c.segs.some(function(g){ return mins(g[0])<b && a<mins(g[1]); });
+  }
+  function avatar(i, name){
+    var parts = name.split(',');
+    var ini = (parts[1]||' ').trim().charAt(0) + (parts[0]||' ').trim().charAt(0);
+    var hue = HUES[i % HUES.length];
+    return '<svg class="avatar" viewBox="0 0 44 44" role="img" aria-label="'+name+'">' +
+      '<rect width="44" height="44" fill="'+hue+'"/>' +
+      '<circle cx="22" cy="17" r="7.5" fill="rgba(255,255,255,.9)"/>' +
+      '<path d="M6 44c0-9 7.2-14 16-14s16 5 16 14z" fill="rgba(255,255,255,.9)"/>' +
+      '<text x="22" y="27" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" ' +
+      'font-size="15" font-weight="700" fill="'+hue+'">'+ini+'</text></svg>';
+  }
+
+  function render(){
+    document.getElementById('scheduled').textContent =
+      fmt(gs.value)+' – '+fmt(ge.value)+' · '+(mins(ge.value)-mins(gs.value))+' min';
+
+    roster.innerHTML = clients.map(function(c,i){
+      var flagged = ov(c), missing = inc(c), opts = list(c);
+      if (flagged) c.wasFlagged = true;
+      var fixed = !flagged && c.wasFlagged && !c.dismissed;
+
+      var tags = '';
+      if(!c.present) tags += '<span class="tag mute">Absent</span>';
+      if(c.isp==='initial') tags += '<span class="tag info">Initial ISP</span>';
+      tags += missing ? '<span class="tag warn">No objective</span>' : '<span class="tag ok">Complete</span>';
+      if(flagged) tags += '<span class="tag bad">Overlap</span>';
+      else if(fixed) tags += '<span class="tag ok">Overlap resolved</span>';
+
+      var locked = released && c.signed;
+      if (c.addedAfter && !c.signed) tags += '<span class="tag warn">Unsigned</span>';
+
+      var h = '<article class="cli'+(flagged?' flag':'')+(fixed?' fixed':'')+
+        (locked?' locked':'')+(c.addedAfter&&!c.signed?' late':'')+'" id="card-'+c.id+'">' +
+        '<div class="top">'+avatar(i,c.n)+
+          '<div class="who"><div class="nm">'+c.n+'</div>' +
+          '<div class="mrn mono">MRN '+c.mrn+' · '+hrs(c)+' hrs</div></div>' +
+          '<div class="rt">'+tags+
+          (locked ? '' : '<button class="rmv" type="button" data-rm="'+c.id+
+            '" title="Remove from roster — was not meant to be in this group">×</button>') +
+          '</div></div>';
+
+      if (locked) {
+        h += '<div class="lockbar">🔒 Signed 08/19/2026 4:12 PM · Dana Reyes, CSAC' +
+          (c.addedAfter ? ' · added after the group was signed' : '') + '</div>';
+      } else if (c.addedAfter) {
+        h += '<div class="latebar"><span class="t">Added after signature</span>' +
+          '<span>The group note stays signed. Only this entry needs a signature — nobody re-signs the ' +
+          'other '+(clients.length-1)+'.</span>' +
+          '<button class="btn small primary" type="button" data-signone="'+c.id+
+          '"'+(inc(c)?' disabled':'')+'>Sign this entry</button></div>';
+      }
+
+      if (flagged) {
+        h += '<div class="inflag"><span class="t">Overlap</span><span>This group (' +
+          c.segs.map(function(g){return fmt(g[0])+'–'+fmt(g[1]);}).join(', ') +
+          ') collides with an unsigned <b>Individual session 9:30–10:00 AM</b> by C. Ruiz, LPC. ' +
+          'Flagged on both notes until the times no longer overlap.</span></div>';
+      } else if (fixed) {
+        h += '<div class="inflag fixed"><span class="t">Resolved</span><span>Was overlapping the ' +
+          '<b>Individual session 9:30–10:00 AM</b> (C. Ruiz, LPC). Now documented as ' +
+          '<b class="mono">'+c.segs.map(function(g){return fmt(g[0])+'–'+fmt(g[1]);}).join(', ')+'</b> — ' +
+          '<b class="mono">'+hrs(c)+' hrs</b>, no minutes lost. The other note clears too.</span>' +
+          '<button class="dismiss" type="button" data-dismiss="'+c.id+'" title="Dismiss">×</button></div>';
+      }
+
+      h += '<div class="cbody"><div>' +
+        '<div class="k">Individual entry</div>' +
+        '<textarea data-note="'+c.id+'">'+c.note+'</textarea>' +
+        '<div class="k" style="margin-top:13px;">Objectives addressed' +
+          (c.isp==='initial'?' <span style="text-transform:none;letter-spacing:0;font-weight:400">(initial ISP)</span>':'') +
+        '</div><div class="chips">';
+      c.sel.forEach(function(id){
+        var o = opts.filter(function(x){return x.id===id;})[0];
+        if(!o) return;
+        h += '<span class="ochip"><span class="id">'+o.id+'</span>' +
+          '<span style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+o.t+'</span>' +
+          '<span class="x" data-unlink="'+c.id+':'+o.id+'">×</span></span>';
+      });
+      h += '<span class="pop" data-pop="'+c.id+'">' +
+        '<button class="plus" type="button" data-open="'+c.id+'">+ Link objective</button>' +
+        '<span class="sheet"><span class="hd">' +
+        (c.isp==='initial'?'Initial ISP objectives':'Comprehensive ISP objectives') + '</span>' +
+        opts.map(function(o){
+          var on = c.sel.indexOf(o.id)>-1;
+          return '<button type="button" '+(on?'disabled':'')+' data-link="'+c.id+':'+o.id+'">' +
+            '<span class="id">'+o.id+(on?' · linked':'')+'</span>'+o.t+'</button>';
+        }).join('') + '</span></span>';
+      h += '</div>';
+      if (missing) h += '<p class="sub" style="color:var(--warn);margin:8px 0 0">At least one objective is required.</p>';
+      h += '<p class="demonote">Group notes link objectives. Progress against them is rated in the ' +
+        'individual session, by the clinician who can judge it.</p>';
+      h += '</div><div class="side"><div class="box">' +
+        '<div class="k">Attendance</div>';
+      if (c.present) {
+        c.segs.forEach(function(g,j){
+          h += '<div class="timerow"><span class="lab">'+(j===0?'In / out':'Segment '+(j+1))+'</span>' +
+            '<input type="time" value="'+g[0]+'" data-t="'+c.id+':'+j+':0">' +
+            '<input type="time" value="'+g[1]+'" data-t="'+c.id+':'+j+':1">' +
+            (j>0?'<button class="rm" type="button" data-delseg="'+c.id+':'+j+'">×</button>':'') + '</div>';
+        });
+        h += '<button class="plus" type="button" data-addseg="'+c.id+'">+ Segment</button>' +
+          '<div class="sub" style="margin-top:9px;">Total <span class="mono tot">'+hrs(c)+' hrs</span></div>';
+      } else {
+        h += '<div class="tag mute">Absent — no service time</div>';
+      }
+      h += '<div class="k" style="margin-top:14px;">Participation</div>' +
+        '<select data-part="'+c.id+'">'+PART.map(function(p){
+          return '<option'+(p===c.part?' selected':'')+'>'+p+'</option>'; }).join('')+'</select>';
+      h += '</div></div></div></article>';
+      return h;
+    }).join('');
+
+    var unsignedLate = clients.filter(function(c){ return c.addedAfter && !c.signed; });
+    document.getElementById('qabox').style.display = released ? '' : 'none';
+    document.getElementById('qacount').textContent = clients.length;
+    document.getElementById('lateline').innerHTML = unsignedLate.length
+      ? '<b style="color:var(--warn)">'+unsignedLate.length+' entry added after signature, awaiting signature.</b> ' +
+        'The parent note and the other '+(clients.length-unsignedLate.length)+' entries stay signed and released.'
+      : 'All '+clients.length+' entries signed. Adding someone later will not disturb them.';
+
+    var missing = clients.filter(inc), anyOv = clients.some(ov);
+    document.getElementById('progresslabel').textContent =
+      (clients.length-missing.length)+' of '+clients.length+' complete';
+    document.getElementById('rostercount').textContent = clients.length;
+
+    var strip = document.getElementById('strip');
+    if (anyOv) {
+      var f = clients.filter(ov)[0];
+      strip.style.display = '';
+      document.getElementById('stripmsg').innerHTML =
+        '<b>'+f.n+'</b> — group time collides with an unsigned Individual session 9:30–10:00 AM (C. Ruiz, LPC)';
+      document.getElementById('jump').setAttribute('href', '#card-'+f.id);
+    } else { strip.style.display = 'none'; }
+
+    var btn=document.getElementById('signbtn'), st=document.getElementById('signstatus');
+    if (signed) {
+      btn.disabled=true; btn.textContent='Signed';
+      st.innerHTML = settling
+        ? '<b style="color:var(--accent)">Signed — settling</b><span class="sub">Claim generation and ' +
+          'supervisor routing are held until the retraction window closes.</span>'
+        : '<b style="color:var(--good)">Signed and released</b><span class="sub">Claim generated, ' +
+          '6 chart copies distributed.</span>';
+    } else if (missing.length) {
+      btn.disabled=true;
+      st.innerHTML='<b style="color:var(--warn)">Blocked — '+missing.length+' entry without an objective</b>' +
+        '<span class="sub">'+missing.map(function(c){return c.n.split(',')[0];}).join(', ')+
+        ' — every entry must link at least one objective.</span>';
+    } else if (anyOv) {
+      btn.disabled=false;
+      st.innerHTML='<b style="color:var(--alert)">1 unresolved overlap</b><span class="sub">You can still ' +
+        'sign — a second clinician is involved, so this is coordination, not an impossible time. ' +
+        'Signing requires acknowledgment.</span>';
+    } else {
+      btn.disabled=false;
+      st.innerHTML='<b style="color:var(--good)">Ready to sign</b><span class="sub">One signature covers all ' +
+        clients.length+' entries.</span>';
+    }
+  }
+
+  /* ---------- interactions ---------- */
+  document.addEventListener('click', function(e){
+    var t=e.target, d=t.dataset||{};
+
+    if (d.open) {
+      e.stopPropagation();
+      var pop = t.closest('.pop'), was = pop.classList.contains('on');
+      document.querySelectorAll('.pop').forEach(function(p){ p.classList.remove('on'); });
+      if(!was) pop.classList.add('on');
+      return;
+    }
+    if (d.link) { var p=d.link.split(':'); var c=byId(p[0]); if(c.sel.indexOf(p[1])<0) c.sel.push(p[1]); render(); return; }
+    if (d.unlink) { var q=d.unlink.split(':'); var c2=byId(q[0]); c2.sel.splice(c2.sel.indexOf(q[1]),1); render(); return; }
+    if (d.addseg) {
+      var c3=byId(d.addseg), last=c3.segs[c3.segs.length-1];
+      c3.segs[c3.segs.length-1]=[last[0],'09:30']; c3.segs.push(['10:00',last[1]]); render(); return;
+    }
+    if (d.delseg) { var r=d.delseg.split(':'); byId(r[0]).segs.splice(+r[1],1); render(); return; }
+    if (d.rm) {
+      var c4=byId(d.rm);
+      clients = clients.filter(function(x){ return x.id!==d.rm; });
+      render();
+      flash(c4.n.split(',')[0]+' removed from the roster. Removing is not the same as marking absent — ' +
+        'this says they were never meant to be in this group.');
+      return;
+    }
+    if (d.dismiss) { byId(d.dismiss).dismissed = true; render(); return; }
+    if (d.census) {
+      var p = CENSUS.filter(function(x){ return x.id===d.census; })[0];
+      clients.push({ id:p.id, n:p.n, mrn:p.mrn, present:true, isp:p.isp,
+        segs:[[gs.value, ge.value]], part:'Active', sel:[], note:'',
+        signed:false, addedAfter:released });
+      document.getElementById('censuspop').classList.remove('on');
+      render();
+      if (released) {
+        logEvent('Roster add', p.n+' added after signature · parent note and other entries untouched','info');
+        flash(p.n.split(',')[0]+' added to a signed note. The parent stays signed, the other entries stay ' +
+          'released, and only this one needs a signature.');
+      } else {
+        flash(p.n.split(',')[0]+' added from the active census — PHP clients with an open episode ' +
+          'covering 08/19.');
+      }
+      return;
+    }
+    if (d.signone) {
+      var lc = byId(d.signone);
+      lc.signed = true;
+      logEvent('Entry signed', lc.n+' · Dana Reyes, CSAC · single entry · own claim line','ok');
+      render();
+      flash(lc.n.split(',')[0]+"'s entry signed and released on its own. Nobody else re-signed anything.");
+      return;
+    }
+    document.querySelectorAll('.pop').forEach(function(p){ p.classList.remove('on'); });
+  });
+
+  document.addEventListener('change', function(e){
+    var d=e.target.dataset||{};
+    if (d.t) { var p=d.t.split(':'); byId(p[0]).segs[+p[1]][+p[2]]=e.target.value; render(); }
+    if (d.part) { byId(d.part).part=e.target.value; }
+    if (d.note) { byId(d.note).note=e.target.value; }
+  });
+
+  /* ---------- active census (as of date of service, scoped by service type) ---------- */
+  var CENSUS = [
+    { id:'x1', n:'Bell, Trina',        mrn:'005104', loc:'PHP 2.5', isp:'comprehensive' },
+    { id:'x2', n:'Marchetti, Sofia',   mrn:'004812', loc:'PHP 2.5', isp:'comprehensive' },
+    { id:'x3', n:'Duong, Kevin',       mrn:'005077', loc:'PHP 2.5', isp:'initial' },
+    { id:'x4', n:'Rasmussen, Erik',    mrn:'004930', loc:'PHP 2.5', isp:'comprehensive' },
+    { id:'x5', n:'Ferreira, Camila',   mrn:'005142', loc:'PHP 2.5', isp:'initial' }
+  ];
+
+  function censusSheet(){
+    var here = clients.map(function(c){ return c.mrn; });
+    var avail = CENSUS.filter(function(p){ return here.indexOf(p.mrn) < 0; });
+    var h = '<span class="hd">Active census · PHP · Wed 08/19/2026 · ' + avail.length + ' not on roster</span>';
+    h += avail.length ? avail.map(function(p){
+      return '<button type="button" data-census="'+p.id+'"><span class="id">MRN '+p.mrn+' · '+p.loc+
+        (p.isp==='initial'?' · initial ISP':'')+'</span>'+p.n+'</button>';
+    }).join('') : '<button type="button" disabled>Everyone on census is already on this roster</button>';
+    document.getElementById('censussheet').innerHTML = h;
+  }
+
+  document.getElementById('addcli').addEventListener('click', function(e){
+    e.stopPropagation();
+    var pop = document.getElementById('censuspop'), was = pop.classList.contains('on');
+    document.querySelectorAll('.pop').forEach(function(p){ p.classList.remove('on'); });
+    if (!was) { censusSheet(); pop.classList.add('on'); }
+  });
+
+  document.getElementById('applytime').addEventListener('click', function(){
+    var moved=0, kept=0;
+    clients.forEach(function(c){
+      if(!c.present) return;
+      var def = c.segs.length===1 && c.segs[0][0]===gs.dataset.prev && c.segs[0][1]===ge.dataset.prev;
+      if (def) { c.segs=[[gs.value,ge.value]]; moved++; } else kept++;
+    });
+    gs.dataset.prev=gs.value; ge.dataset.prev=ge.value;
+    render();
+    flash(moved+' updated, '+kept+' left alone — custom segments and late arrivals are never overwritten.');
+  });
+
+  function flash(msg){
+    var st=document.getElementById('signstatus');
+    st.innerHTML='<b style="color:var(--accent)">'+msg+'</b>';
+    clearTimeout(flash.t); flash.t=setTimeout(render,4200);
+  }
+
+  /* ---------- signing ---------- */
+  var WINDOW=300;
+  function stampAt(off){
+    var d=new Date(2026,7,19,16,12,0); d.setSeconds(d.getSeconds()+off);
+    var h=d.getHours(), ap=h>=12?'PM':'AM';
+    return (h%12||12)+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')+' '+ap;
+  }
+  function logEvent(kind,detail,tone){
+    audit.push({kind:kind,detail:detail,tone:tone,at:stampAt(audit.length*103)});
+    document.getElementById('auditlist').innerHTML=audit.map(function(e){
+      return '<div class="ev"><span class="tag '+e.tone+'">'+e.kind+'</span>' +
+        '<span class="w">'+e.detail+'</span><span class="mono sub">'+e.at+'</span></div>';
+    }).join('');
+    document.getElementById('auditcard').classList.add('on');
+  }
+
+  document.getElementById('signbtn').addEventListener('click', function(){
+    if (clients.some(ov)) {
+      var c=clients.filter(ov)[0];
+      document.getElementById('promptbody').innerHTML='<b>'+c.n+'</b> — this group (' +
+        c.segs.map(function(g){return fmt(g[0])+'–'+fmt(g[1]);}).join(', ') +
+        ') against an unsigned Individual session 9:30–10:00 AM by C. Ruiz, LPC. The flag stays on both ' +
+        'notes until the times no longer collide. Signing does not clear it.';
+      document.getElementById('prompt').classList.add('on');
+      document.getElementById('ack').checked=false;
+      document.getElementById('confirmsign').disabled=true;
+    } else finish();
+  });
+  document.getElementById('ack').addEventListener('change', function(){
+    document.getElementById('confirmsign').disabled=!this.checked;
+  });
+  document.getElementById('cancelsign').addEventListener('click', function(){
+    document.getElementById('prompt').classList.remove('on');
+  });
+  document.getElementById('confirmsign').addEventListener('click', finish);
+
+  document.getElementById('unlockall').addEventListener('click', function(){
+    clients.forEach(function(c){ c.signed=false; c.addedAfter=false; });
+    signed=false; settling=false; released=false;
+    clearInterval(ticker);
+    document.getElementById('donecard').classList.remove('on');
+    var chip=document.getElementById('statechip');
+    chip.textContent='Draft · Unlocked by QA'; chip.style.background='#B5760A';
+    logEvent('Unlocked','C. Ruiz, QA · entire note · all '+clients.length+' entries reopened','warn');
+    render();
+    flash('Entire note unlocked — all '+clients.length+' entries, including any added later. ' +
+      'Everything gets re-signed together.');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  function finish(){
+    signed=true; settling=true;
+    clients.forEach(function(c){ c.signed=true; c.addedAfter=false; });
+    document.getElementById('prompt').classList.remove('on');
+    document.getElementById('donecard').classList.add('on');
+    document.getElementById('reasonbox').style.display='none';
+    document.getElementById('retractbox').style.display='';
+    var chip=document.getElementById('statechip');
+    chip.textContent='Signed'; chip.style.background='#1C8351';
+    logEvent('Signed','Dana Reyes, CSAC · '+clients.length+' entries · claim and supervisor routing held','ok');
+    left=WINDOW; clearInterval(ticker); ticker=setInterval(tick,1000); tick();
+    render();
+    document.getElementById('donecard').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function tick(){
+    var clk=document.getElementById('retractclock'), msg=document.getElementById('settlemsg');
+    if (left<=0) {
+      clearInterval(ticker); settling=false; released=true;
+      document.getElementById('retractbox').style.display='none';
+      clk.textContent='Released';
+      msg.innerHTML='Window closed. Claim generated, supervisor routing released, '+clients.length+
+        ' chart copies distributed. Further changes go through the amendment path.';
+      logEvent('Released','Window closed · claim generated · '+clients.length+' chart copies distributed','info');
+      render(); return;
+    }
+    var m=Math.floor(left/60), s=left%60;
+    clk.textContent='Retractable for '+m+':'+String(s).padStart(2,'0');
+    msg.innerHTML='<b>Nothing downstream has fired yet.</b> The claim is not generated and the supervisor ' +
+      'queue is not notified until this window closes — so retracting costs nothing and never has to be blocked.';
+    left--;
+  }
+
+  document.getElementById('unsignbtn').addEventListener('click', function(){
+    document.getElementById('reasonbox').style.display='block';
+  });
+  document.getElementById('cancelunsign').addEventListener('click', function(){
+    document.getElementById('reasonbox').style.display='none';
+  });
+  document.getElementById('reasons').addEventListener('click', function(e){
+    if(!e.target.dataset.r) return;
+    reason=e.target.dataset.r;
+    [].forEach.call(this.querySelectorAll('button'), function(b){ b.classList.toggle('primary', b===e.target); });
+    document.getElementById('confirmunsign').disabled=false;
+  });
+  document.getElementById('confirmunsign').addEventListener('click', function(){
+    clearInterval(ticker); signed=false; settling=false; released=false;
+    clients.forEach(function(c){ c.signed=false; });
+    logEvent('Retracted','Dana Reyes, CSAC · '+reason+' · nothing downstream had fired','warn');
+    document.getElementById('donecard').classList.remove('on');
+    document.getElementById('reasonbox').style.display='none';
+    document.getElementById('confirmunsign').disabled=true;
+    [].forEach.call(document.querySelectorAll('#reasons button'), function(b){ b.classList.remove('primary'); });
+    reason='';
+    var chip=document.getElementById('statechip');
+    chip.textContent='Draft · Reopened'; chip.style.background='#B5760A';
+    render();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  document.querySelectorAll('.seg2 button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.body.classList.toggle('clean', b.dataset.v==='clean');
+      document.querySelectorAll('.seg2 button').forEach(function(o){ o.setAttribute('aria-pressed', String(o===b)); });
+    });
+  });
+
+  render();
+})();
+</script>

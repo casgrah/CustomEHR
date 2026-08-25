@@ -1,0 +1,494 @@
+<meta charset="utf-8">
+<title>Individual Progress Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+
+<style>
+  :root {
+    --chrome:#0A4767; --chrome-hi:#0F6690; --chrome-ink:#DDEDF7; --chrome-dim:#94BFD9;
+    --ground:#E9EAEC; --surface:#FFFFFF; --surface-2:#F2F3F5; --surface-3:#E3E5E9;
+    --ink:#13161A; --ink-soft:#4E555E; --ink-faint:#79818B;
+    --line:#D5D8DD; --line-strong:#A9AEB6;
+    --accent:#0A6893; --accent-soft:#DCEFFA;
+    --alert:#9C2317; --alert-soft:#FBE2DF; --warn:#875204; --warn-soft:#FAEDD4;
+    --good:#1C6741; --good-soft:#DDEFE4;
+    /* Progress ramp. Regressed is a reserved STATUS color (movement backward is
+       qualitatively different). The other three are one SEQUENTIAL hue, light→dark,
+       lightness strictly monotonic — which survives every CVD type. Height encodes
+       the value independently, so color is never the only signal. */
+    --p-reg:#B3261E; --p-none:#589578; --p-prog:#2F7D5E; --p-done:#12513A; --p-na:#C3C8CE;
+    --shadow:0 1px 2px rgba(19,22,26,.08), 0 2px 10px rgba(19,22,26,.05);
+    --fs:14px; --fs-sm:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+      --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+      --line:#2F343A; --line-strong:#454C54;
+      --accent:#6BBEE8; --accent-soft:#12303F;
+      --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+      --good:#6FC094; --good-soft:#1B2E24;
+      --p-reg:#F08A7C; --p-none:#4E7D6B; --p-prog:#5FB894; --p-done:#9BD9B8; --p-na:#4A5158;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+    --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+    --line:#2F343A; --line-strong:#454C54;
+    --accent:#6BBEE8; --accent-soft:#12303F;
+    --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+    --good:#6FC094; --good-soft:#1B2E24;
+    --p-reg:#F08A7C; --p-none:#4E7D6B; --p-prog:#5FB894; --p-done:#9BD9B8; --p-na:#4A5158;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+  }
+
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    font-size:var(--fs); line-height:1.55; -webkit-font-smoothing:antialiased; padding-bottom:108px; }
+  a { color:var(--accent); }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  .mono { font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .wrap { max-width:1160px; margin:0 auto; padding:0 18px; }
+  .k { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-bottom:5px; }
+  .sub { color:var(--ink-soft); font-size:var(--fs-sm); }
+  .demonote { font-size:var(--fs-sm); color:var(--ink-faint); font-style:italic; margin:8px 0 0; }
+  .demonote::before { content:"demo note — "; font-style:normal; font-weight:700; letter-spacing:.05em; font-size:10px; text-transform:uppercase; }
+  body.clean .demonote { display:none !important; }
+
+  .bar { background:var(--surface-3); border-bottom:1px solid var(--line-strong); padding:8px 0; font-size:12.5px; }
+  .bar .wrap { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; }
+  .bar b { color:var(--ink); }
+  .seg2 { display:flex; border:1px solid var(--line-strong); border-radius:5px; overflow:hidden; }
+  .seg2 button { font-family:inherit; font-size:12.5px; background:var(--surface); color:var(--ink-soft);
+    border:0; border-right:1px solid var(--line); padding:5px 11px; cursor:pointer; }
+  .seg2 button:last-child { border-right:0; }
+  .seg2 button[aria-pressed="true"] { background:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+
+  .sticky { position:sticky; top:0; z-index:30; }
+  .idbar { background:var(--chrome); color:var(--chrome-ink); padding:12px 0; }
+  .idbar .wrap { display:flex; flex-wrap:wrap; gap:13px 22px; align-items:center; }
+  .ava { width:46px; height:46px; border-radius:50%; flex:0 0 46px; border:2px solid rgba(255,255,255,.28); }
+  .idbar h1 { font-family:"Source Serif 4",Georgia,serif; font-size:21px; font-weight:700;
+    margin:0; letter-spacing:-.015em; line-height:1.2; color:#fff; }
+  :root[data-theme="dark"] .idbar h1, :root:not([data-theme="light"]) .idbar h1 { color:var(--chrome-ink); }
+  .facts { display:flex; flex-wrap:wrap; gap:4px 13px; font-size:var(--fs-sm); color:var(--chrome-dim); align-items:center; }
+  .facts b { color:var(--chrome-ink); font-weight:500; }
+  .chip { display:inline-block; padding:2px 9px; border-radius:3px; font-size:10.5px; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase; background:var(--chrome-hi); color:var(--chrome-ink);
+    border:1px solid rgba(255,255,255,.18); }
+  .chip.loc { background:#7ED0F5; color:#06344A; border-color:transparent; }
+  .chip.ep { background:#1C8351; color:#fff; border-color:transparent; }
+  .chip.draft { background:#B5760A; color:#fff; border-color:transparent; }
+  .hdrblock { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
+    border-radius:5px; padding:7px 11px; margin-left:auto; }
+  .hdrblock .lbl { font-size:9.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--chrome-dim); }
+  .hdrblock .val { font-size:var(--fs-sm); color:var(--chrome-ink); }
+
+  .strip { background:var(--alert); color:#fff; padding:9px 0; font-size:var(--fs-sm); }
+  .strip.fixed { background:var(--good); }
+  .strip .wrap { display:flex; flex-wrap:wrap; gap:7px 14px; align-items:center; }
+  .strip .t { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.92; }
+  .strip a { color:#fff; font-weight:600; }
+
+  main { padding:16px 0 30px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:14px; }
+  .card > h2 { margin:0; padding:11px 18px; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-soft); border-bottom:1px solid var(--line); background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .card > h2 .n { font-size:11px; letter-spacing:0; text-transform:none; font-weight:500; }
+  .card .body { padding:16px 18px; }
+
+  .cols { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); gap:14px; align-items:start; }
+  @media (max-width:960px) { .cols { grid-template-columns:1fr; } }
+
+  .fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px 16px; }
+  textarea, input[type=text], select { font-family:inherit; font-size:var(--fs); color:var(--ink);
+    background:var(--surface); border:1px solid var(--line-strong); border-radius:4px;
+    padding:9px 11px; width:100%; line-height:1.55; }
+  textarea { resize:vertical; min-height:70px; }
+  input[type=time] { font-family:"IBM Plex Mono",monospace; font-size:13px; padding:5px 8px;
+    border:1px solid var(--line-strong); border-radius:4px; background:var(--surface); color:var(--ink); }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:3px; font-size:10px; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase; }
+  .tag.ok { background:var(--good-soft); color:var(--good); }
+  .tag.warn { background:var(--warn-soft); color:var(--warn); }
+  .tag.bad { background:var(--alert-soft); color:var(--alert); }
+  .tag.info { background:var(--accent-soft); color:var(--accent); }
+  .tag.mute { background:var(--surface-3); color:var(--ink-soft); }
+
+  /* ---------- objectives ---------- */
+  .obj { border-top:1px solid var(--line); padding:14px 18px; }
+  .obj:first-child { border-top:0; }
+  .objhead { display:flex; gap:14px; align-items:flex-start; margin-bottom:10px; }
+  .objtext { flex:1 1 auto; min-width:0; }
+  .objtext .oid { font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:700;
+    letter-spacing:.06em; color:var(--ink-faint); display:block; margin-bottom:1px; }
+
+  .trend { flex:0 0 auto; display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
+  .trend .lbl { font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; }
+  .spark { display:flex; align-items:flex-end; gap:3px; height:26px; }
+  .spark .b { width:7px; border-radius:2px 2px 0 0; background:var(--p-na); position:relative; }
+  .spark .b[data-v="regressed"]   { background:var(--p-reg);  height:26%; }
+  .spark .b[data-v="none"]        { background:var(--p-none); height:46%; }
+  .spark .b[data-v="progressing"] { background:var(--p-prog); height:72%; }
+  .spark .b[data-v="completed"]   { background:var(--p-done); height:100%; }
+  .spark .b[data-v="not-addressed"]{ background:transparent; border:1px dashed var(--p-na); height:14%; }
+  .spark .b.now { outline:2px solid var(--surface); box-shadow:0 0 0 2px var(--ink-faint); }
+
+  .scale { display:flex; flex-wrap:wrap; border:1px solid var(--line-strong); border-radius:4px; overflow:hidden; }
+  .scale button { flex:1 1 auto; font-family:inherit; font-size:12px; font-weight:500; padding:8px 8px;
+    background:var(--surface); color:var(--ink-soft); border:0; border-right:1px solid var(--line); cursor:pointer;
+    white-space:nowrap; }
+  .scale button:last-child { border-right:0; }
+  .scale button:hover { background:var(--surface-2); color:var(--ink); }
+  .scale button[aria-pressed="true"] { color:#fff; font-weight:700; }
+  .scale button[aria-pressed="true"][data-v="not-addressed"] { background:var(--ink-faint); }
+  .scale button[aria-pressed="true"][data-v="regressed"]     { background:var(--p-reg); }
+  .scale button[aria-pressed="true"][data-v="none"]          { background:var(--p-none); }
+  .scale button[aria-pressed="true"][data-v="progressing"]   { background:var(--p-prog); }
+  .scale button[aria-pressed="true"][data-v="completed"]     { background:var(--p-done); }
+  .objnarr { margin-top:10px; display:none; }
+  .obj.needs .objnarr { display:block; }
+  .reqline { font-size:var(--fs-sm); color:var(--warn); font-weight:500; margin-bottom:5px; }
+  .obj.blank { background:var(--warn-soft); }
+
+  .toggle { display:flex; gap:11px; align-items:flex-start; cursor:pointer; }
+  .toggle input { margin-top:3px; }
+  .revfields { display:none; margin-top:14px; }
+  .revfields.on { display:block; }
+  .revfields .q { margin-bottom:13px; }
+
+  .mini { display:flex; justify-content:space-between; gap:10px; padding:9px 18px; border-top:1px solid var(--line); font-size:var(--fs-sm); }
+  .mini:first-of-type { border-top:0; }
+
+  .signbar { position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--surface);
+    border-top:2px solid var(--line-strong); box-shadow:0 -3px 14px rgba(0,0,0,.09); }
+  .signbar .wrap { display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; padding:12px 18px; }
+  .signbar .status { flex:1 1 340px; min-width:0; font-size:var(--fs-sm); }
+  .signbar .status b { display:block; font-size:var(--fs); margin-bottom:2px; }
+  .btn { font-family:inherit; font-size:var(--fs); font-weight:600; padding:10px 20px; border-radius:5px;
+    cursor:pointer; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  :root[data-theme="dark"] .btn.primary, :root:not([data-theme="light"]) .btn.primary { color:#06222F; }
+  .btn.primary[disabled] { background:var(--surface-3); border-color:var(--line-strong); color:var(--ink-faint); cursor:not-allowed; }
+  .btn.small { font-size:var(--fs-sm); padding:6px 13px; font-weight:500; }
+
+  footer { padding:22px 0 40px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--line); background:var(--surface-2); }
+  footer p { margin:0 0 7px; max-width:82ch; } footer b { color:var(--ink-soft); }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <b>View</b>
+    <div class="seg2" role="group" aria-label="Annotations">
+      <button type="button" data-v="annotated" aria-pressed="true">With demo notes</button>
+      <button type="button" data-v="clean" aria-pressed="false">Clean</button>
+    </div>
+    <span class="sub">This is the same 08/19 conflict as the group note — from the other clinician's side.</span>
+  </div>
+</div>
+
+<div class="sticky">
+  <header class="idbar">
+    <div class="wrap">
+      <svg class="ava" viewBox="0 0 46 46" role="img" aria-label="Nguyen, Thao">
+        <rect width="46" height="46" fill="#7A5C86"/>
+        <circle cx="23" cy="18" r="7.8" fill="rgba(255,255,255,.9)"/>
+        <path d="M6 46c0-9.4 7.6-14.6 17-14.6S40 36.6 40 46z" fill="rgba(255,255,255,.9)"/>
+        <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Sans, sans-serif"
+              font-size="15" font-weight="700" fill="#7A5C86">TN</text>
+      </svg>
+      <div>
+        <h1>Nguyen, Thao</h1>
+        <div class="facts" style="margin-top:4px;">
+          <span>MRN <b class="mono">005011</b></span>
+          <span>DOB <b class="mono">11/02/1994</b> (31)</span>
+          <span class="chip loc">ASAM 2.5 · PHP</span>
+          <span class="chip ep">Episode Open</span>
+          <span class="chip draft" id="statechip">Draft</span>
+        </div>
+      </div>
+      <div class="hdrblock">
+        <div class="lbl">Allergies</div>
+        <div class="val">No known allergies</div>
+      </div>
+    </div>
+  </header>
+  <div class="strip" id="strip">
+    <div class="wrap">
+      <span class="t" id="striplabel">Overlap</span>
+      <span id="stripmsg"></span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>Session <span class="n">Individual counseling · Reyes-supervised caseload</span></h2>
+    <div class="body">
+      <div class="fields">
+        <div><div class="k">Date of service</div><div class="mono">08/19/2026</div></div>
+        <div><div class="k">Start</div><input type="time" id="tstart" value="09:30"></div>
+        <div><div class="k">End</div><input type="time" id="tend" value="10:00"></div>
+        <div><div class="k">Duration</div><div class="mono" id="dur">0.50 hrs</div></div>
+        <div><div class="k">Service type</div><div>Individual counseling <span class="sub">· counts toward PHP hours</span></div></div>
+        <div><div class="k">Setting</div><div>Riverside Bldg B · Room 5</div></div>
+        <div><div class="k">Clinician</div><div>C. Ruiz, LPC <span class="sub">· fully licensed</span></div></div>
+        <div><div class="k">Modality</div><div>In person</div></div>
+      </div>
+      <p class="demonote">Note where the fix lives. This session really did happen at 9:30 — the client
+        was pulled out of group for it. So from this side the honest move is to acknowledge and sign;
+        the resolution belongs to the group note, which segments around this. Move the time to
+        10:30–11:00 only if it was entered wrong, and watch the banner turn green.</p>
+    </div>
+  </section>
+
+  <div class="cols">
+    <div>
+      <section class="card">
+        <h2>Narrative <span class="n">Template: Individual counseling — SUD</span></h2>
+        <div class="body">
+          <div class="k">Presentation</div>
+          <textarea>Presented anxious and tearful at the start of session, reporting a call from her former partner the previous evening. Oriented, no acute safety concerns. Denied use since admission.</textarea>
+          <div class="k" style="margin-top:14px;">Interventions</div>
+          <textarea>Used motivational interviewing to explore ambivalence about maintaining the boundary. Reviewed her written safety plan and the two coping strategies identified in group earlier this morning. Practiced a scripted response for future contact.</textarea>
+          <div class="k" style="margin-top:14px;">Client response</div>
+          <textarea>Engaged readily. Identified that she had already used one of the group strategies — leaving the room and calling her sponsor — before the call ended. Named this as the first time she had interrupted the pattern.</textarea>
+          <div class="k" style="margin-top:14px;">Plan</div>
+          <textarea>Continue PHP at current intensity. Rehearse boundary script in next individual session. Sponsor contact daily. Revisit family objective at 30-day review.</textarea>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Treatment plan objectives <span class="n" id="objstatus"></span></h2>
+        <div id="objs"></div>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <h2>30-day ISP review <span class="n">Due 08/27</span></h2>
+        <div class="body">
+          <label class="toggle">
+            <input type="checkbox" id="revtoggle">
+            <span><b>Use this note to satisfy the 30-day review</b><br>
+              <span class="sub">Permitted for ASAM 2.5 and 3.x — no separate review document required.</span></span>
+          </label>
+          <div class="revfields" id="revfields">
+            <div class="q">
+              <div class="k">Plan, goals, and progress discussed with the team</div>
+              <textarea style="min-height:56px;">Reviewed in treatment team 08/18. Team agreed current intensity remains appropriate.</textarea>
+            </div>
+            <div class="q">
+              <div class="k">Alterations to the ISP</div>
+              <textarea style="min-height:56px;">No changes to objectives. Family objective deferred pending client readiness.</textarea>
+            </div>
+            <div class="q">
+              <div class="k">Review and changes discussed with the individual</div>
+              <textarea style="min-height:56px;">Discussed with client this session; she agreed with continuing at current level and asked to revisit the family objective in two weeks.</textarea>
+            </div>
+            <p class="sub" style="margin:0">Progress figures pull from the objective ratings below. The three
+              attestations are yours — the system can assemble the evidence, not the conversation.</p>
+          </div>
+          <p class="demonote">This is the whole review-as-note argument in one control. The periodic
+            document collapses into the note that was being written anyway.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Prior individual sessions</h2>
+        <div class="mini"><span>08/13 <span class="sub">Ruiz, LPC</span></span><span class="tag ok">Signed</span></div>
+        <div class="mini"><span>08/06 <span class="sub">Ruiz, LPC</span></span><span class="tag ok">Signed</span></div>
+        <div class="mini"><span>07/30 <span class="sub">Ruiz, LPC</span></span><span class="tag ok">Signed</span></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>Throwaway prototype.</b> Fictional client, invented data.</p>
+    <p><b>Try:</b> set every objective to unblock signing · pick Regressed or Completed and watch narrative
+      become required · look at OBJ-2's trend, which is sliding · turn on the 30-day review toggle ·
+      move the session to 10:30–11:00 to see the overlap resolve.</p>
+  </div>
+</footer>
+
+<div class="signbar">
+  <div class="wrap">
+    <div class="status" id="signstatus"></div>
+    <button class="btn primary" type="button" id="signbtn">Sign note</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SCALE = [
+    ['not-addressed','Not addressed'], ['regressed','Regressed'], ['none','No progress'],
+    ['progressing','Progressing'], ['completed','Completed']
+  ];
+  var LABEL = {}; SCALE.forEach(function(s){ LABEL[s[0]] = s[1]; });
+  var NEEDS = { regressed:1, completed:1 };
+  var DATES = ['07/23','07/30','08/06','08/13'];
+
+  var objs = [
+    { id:'OBJ-1', t:'Identify and apply two coping strategies during craving episodes without substance use.',
+      hist:['none','progressing','progressing','progressing'], v:'', narr:'' },
+    { id:'OBJ-2', t:'Attend three recovery support meetings weekly and document the experience.',
+      hist:['progressing','progressing','none','regressed'], v:'', narr:'' },
+    { id:'OBJ-3', t:'Describe personal relapse warning signs and the stage at which they are first noticed.',
+      hist:['not-addressed','none','progressing','progressing'], v:'', narr:'' },
+    { id:'OBJ-4', t:'Rebuild one supportive family relationship through structured contact.',
+      hist:['not-addressed','not-addressed','none','none'], v:'', narr:'' }
+  ];
+
+  var signed = false;
+  var ts = document.getElementById('tstart'), te = document.getElementById('tend');
+
+  function mins(t){ var p=t.split(':'); return (+p[0])*60+(+p[1]); }
+  function fmt(t){ var p=t.split(':'), h=+p[0], ap=h>=12?'PM':'AM'; return (h%12||12)+':'+p[1]+' '+ap; }
+  function dur(){ return ((mins(te.value)-mins(ts.value))/60); }
+  function overlaps(){
+    // group note: Relapse Prevention 9:00–10:30, half-open [start,end)
+    var a=mins('09:00'), b=mins('10:30'), s=mins(ts.value), e=mins(te.value);
+    if (e <= s) return false;               // zero or negative duration is not an overlap
+    return s < b && a < e;
+  }
+
+  function spark(o){
+    var bars = o.hist.map(function(v,i){
+      return '<span class="b" data-v="'+v+'" title="'+DATES[i]+' · '+LABEL[v]+'"></span>';
+    }).join('');
+    var now = o.v ? '<span class="b now" data-v="'+o.v+'" title="Today · '+LABEL[o.v]+'"></span>'
+                  : '<span class="b" data-v="not-addressed" title="Today · not set"></span>';
+    return '<div class="trend"><span class="lbl">Last 4 + today</span><div class="spark">'+bars+now+'</div></div>';
+  }
+
+  function render(){
+    document.getElementById('dur').textContent = dur().toFixed(2)+' hrs';
+
+    document.getElementById('objs').innerHTML = objs.map(function(o,i){
+      var needs = NEEDS[o.v];
+      return '<div class="obj'+(needs?' needs':'')+(o.v?'':' blank')+'">' +
+        '<div class="objhead">'+spark(o)+
+          '<div class="objtext"><span class="oid">'+o.id+'</span>'+o.t+'</div></div>' +
+        '<div class="scale">'+SCALE.map(function(s){
+          return '<button type="button" data-v="'+s[0]+'" data-set="'+i+':'+s[0]+
+            '" aria-pressed="'+(o.v===s[0])+'">'+s[1]+'</button>';
+        }).join('')+'</div>' +
+        '<div class="objnarr"><div class="reqline">Narrative required — “'+(LABEL[o.v]||'')+
+          '” has consequences and needs explaining.</div>' +
+          '<textarea data-narr="'+i+'" placeholder="What happened, and what it means for the plan.">'+
+          (o.narr||'')+'</textarea></div>' +
+        '</div>';
+    }).join('');
+
+    var blank = objs.filter(function(o){ return !o.v; });
+    var missingNarr = objs.filter(function(o){ return NEEDS[o.v] && !(o.narr||'').trim(); });
+    document.getElementById('objstatus').textContent =
+      (objs.length - blank.length)+' of '+objs.length+' rated';
+
+    var ov = overlaps(), strip = document.getElementById('strip');
+    if (ov) {
+      strip.classList.remove('fixed');
+      document.getElementById('striplabel').textContent = 'Overlap';
+      document.getElementById('stripmsg').innerHTML =
+        'This session (<b class="mono">'+fmt(ts.value)+'–'+fmt(te.value)+'</b>) collides with ' +
+        '<b>Relapse Prevention</b> group <b class="mono">9:00–10:30 AM</b> (D. Reyes, CSAC), unsigned. ' +
+        'Flagged on both notes — either side can resolve it.';
+    } else {
+      strip.classList.add('fixed');
+      document.getElementById('striplabel').textContent = 'Resolved';
+      document.getElementById('stripmsg').innerHTML =
+        'No longer overlaps <b>Relapse Prevention</b> 9:00–10:30 AM. This session is now ' +
+        '<b class="mono">'+fmt(ts.value)+'–'+fmt(te.value)+'</b> — <b class="mono">'+dur().toFixed(2)+
+        ' hrs</b>. The group note clears at the same time.';
+    }
+
+    var btn = document.getElementById('signbtn'), st = document.getElementById('signstatus');
+    if (signed) {
+      btn.disabled = true; btn.textContent = 'Signed';
+      st.innerHTML = '<b style="color:var(--good)">Signed — settling</b>' +
+        '<span class="sub">C. Ruiz, LPC · fully licensed, no co-signature required. Claim held ' +
+        'until the retraction window closes.</span>';
+    } else if (blank.length) {
+      btn.disabled = true;
+      st.innerHTML = '<b style="color:var(--warn)">'+blank.length+' objective'+(blank.length>1?'s':'')+
+        ' unrated</b><span class="sub">Every active objective needs a value on an individual note. ' +
+        '“Not addressed” is a real answer; blank is not.</span>';
+    } else if (missingNarr.length) {
+      btn.disabled = true;
+      st.innerHTML = '<b style="color:var(--warn)">Narrative required on '+missingNarr.length+
+        ' objective'+(missingNarr.length>1?'s':'')+'</b><span class="sub">'+
+        missingNarr.map(function(o){ return o.id+' ('+LABEL[o.v]+')'; }).join(', ')+'</span>';
+    } else if (ov) {
+      btn.disabled = false;
+      st.innerHTML = '<b style="color:var(--alert)">Unresolved overlap</b><span class="sub">You can sign ' +
+        'with acknowledgment — or change the end time to 9:30 and it clears for both notes.</span>';
+    } else {
+      btn.disabled = false;
+      st.innerHTML = '<b style="color:var(--good)">Ready to sign</b>' +
+        (document.getElementById('revtoggle').checked
+          ? '<span class="sub">Also satisfies the 30-day ISP review due 08/27.</span>'
+          : '<span class="sub">C. Ruiz, LPC · fully licensed.</span>');
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    var d = e.target.dataset || {};
+    if (d.set) {
+      var p = d.set.split(':'), o = objs[+p[0]];
+      o.v = (o.v === p[1]) ? '' : p[1];
+      if (!NEEDS[o.v]) o.narr = '';
+      render();
+    }
+  });
+  document.addEventListener('input', function(e){
+    var d = e.target.dataset || {};
+    if (d.narr !== undefined) { objs[+d.narr].narr = e.target.value; refreshSign(); }
+  });
+  function refreshSign(){
+    var blank = objs.filter(function(o){ return !o.v; });
+    var missingNarr = objs.filter(function(o){ return NEEDS[o.v] && !(o.narr||'').trim(); });
+    var btn = document.getElementById('signbtn');
+    btn.disabled = signed || blank.length > 0 || missingNarr.length > 0;
+    if (!btn.disabled && !signed) {
+      document.getElementById('signstatus').innerHTML =
+        '<b style="color:var(--good)">Ready to sign</b><span class="sub">C. Ruiz, LPC · fully licensed.</span>';
+    }
+  }
+
+  ts.addEventListener('change', render);
+  te.addEventListener('change', render);
+
+  document.getElementById('revtoggle').addEventListener('change', function(){
+    document.getElementById('revfields').classList.toggle('on', this.checked);
+    render();
+  });
+
+  document.getElementById('signbtn').addEventListener('click', function(){
+    signed = true;
+    var chip = document.getElementById('statechip');
+    chip.textContent = 'Signed'; chip.style.background = '#1C8351';
+    render();
+  });
+
+  document.querySelectorAll('.seg2 button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.body.classList.toggle('clean', b.dataset.v === 'clean');
+      document.querySelectorAll('.seg2 button').forEach(function(o){
+        o.setAttribute('aria-pressed', String(o === b));
+      });
+    });
+  });
+
+  render();
+})();
+</script>

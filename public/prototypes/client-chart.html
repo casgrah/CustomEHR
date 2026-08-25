@@ -1,0 +1,1184 @@
+<meta charset="utf-8">
+<title>Client Chart Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+
+<style>
+  /* ============ palettes : chrome + accent only ============ */
+  :root[data-palette="cerulean"] {
+    --chrome:#0F5F8A; --chrome-hi:#1478AB; --chrome-ink:#E2F1FA; --chrome-dim:#A2CBE3;
+    --accent-l:#0A6893; --accent-d:#6BBEE8; --asoft-l:#DCEFFA; --asoft-d:#12303F;
+  }
+  :root[data-palette="cerulean-gold"] {
+    --chrome:#0F5F8A; --chrome-hi:#1478AB; --chrome-ink:#E2F1FA; --chrome-dim:#A2CBE3;
+    --accent-l:#96700A; --accent-d:#E5BE55; --asoft-l:#FAF1D6; --asoft-d:#372F14;
+  }
+  :root[data-palette="deep-cerulean"] {
+    --chrome:#0A4767; --chrome-hi:#0F6690; --chrome-ink:#DDEDF7; --chrome-dim:#94BFD9;
+    --accent-l:#0A6893; --accent-d:#6BBEE8; --asoft-l:#DCEFFA; --asoft-d:#12303F;
+  }
+  :root[data-palette="ink"] {
+    --chrome:#17191D; --chrome-hi:#272A31; --chrome-ink:#E4E6EA; --chrome-dim:#989DA8;
+    --accent-l:#0A6893; --accent-d:#6BBEE8; --asoft-l:#DCEFFA; --asoft-d:#12303F;
+  }
+
+  /* ============ theme : light ============ */
+  :root {
+    --ground:#E9EAEC; --surface:#FFFFFF; --surface-2:#F2F3F5; --surface-3:#E3E5E9;
+    --ink:#13161A; --ink-soft:#4E555E; --ink-faint:#79818B;
+    --line:#D5D8DD; --line-strong:#A9AEB6;
+    --accent:var(--accent-l); --accent-soft:var(--asoft-l);
+    --alert:#9C2317; --alert-soft:#FBE2DF; --warn:#875204; --warn-soft:#FAEDD4;
+    --good:#1C6741; --good-soft:#DDEFE4;
+    --shadow:0 1px 2px rgba(19,22,26,.08), 0 2px 10px rgba(19,22,26,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+      --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+      --line:#2F343A; --line-strong:#454C54;
+      --accent:var(--accent-d); --accent-soft:var(--asoft-d);
+      --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+      --good:#6FC094; --good-soft:#1B2E24;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+    --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+    --line:#2F343A; --line-strong:#454C54;
+    --accent:var(--accent-d); --accent-soft:var(--asoft-d);
+    --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+    --good:#6FC094; --good-soft:#1B2E24;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.28);
+  }
+
+  /* ============ scale : comfortable ============ */
+  :root {
+    --fs:14px; --fs-sm:12px; --lh:1.55;
+    --pad:18px; --gap:16px; --rowpy:10px; --labmb:4px; --stack:12px; --name:26px;
+  }
+
+  *,*::before,*::after { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    font-size:var(--fs); line-height:var(--lh); -webkit-font-smoothing:antialiased;
+  }
+  a { color:var(--accent); }
+  a:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  .mono { font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+
+  /* ============ control strip ============ */
+  .control {
+    background:var(--surface-3); border-bottom:1px solid var(--line-strong);
+    padding:9px 18px; display:flex; flex-wrap:wrap; align-items:center; gap:9px 14px;
+    font-size:12.5px; line-height:1.4;
+  }
+  .control b { color:var(--ink); }
+  .seg { display:flex; border:1px solid var(--line-strong); border-radius:5px; overflow:hidden; }
+  .seg button {
+    font-family:"IBM Plex Sans",sans-serif; font-size:12.5px;
+    background:var(--surface); color:var(--ink-soft);
+    border:0; border-right:1px solid var(--line); padding:5px 11px; cursor:pointer; white-space:nowrap;
+  }
+  .seg button:last-child { border-right:0; }
+  .seg button[aria-pressed="true"] { background:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+  .sw { width:13px; height:13px; border-radius:3px; display:inline-block; vertical-align:-2px; margin-right:6px; border:1px solid rgba(0,0,0,.25); }
+
+  /* ============ identity header ============ */
+  .idbar {
+    background:var(--chrome); color:var(--chrome-ink);
+    padding:var(--pad) 18px; display:flex; flex-wrap:wrap; gap:var(--gap) 26px; align-items:flex-start;
+  }
+  .idbar h1 {
+    font-family:"Source Serif 4",Georgia,serif; font-size:var(--name); font-weight:700;
+    margin:0 0 5px; letter-spacing:-.015em; line-height:1.12; color:#fff;
+  }
+  :root[data-theme="dark"] .idbar h1, :root:not([data-theme="light"]) .idbar h1 { color:var(--chrome-ink); }
+  .facts { display:flex; flex-wrap:wrap; gap:3px 15px; font-size:var(--fs-sm); color:var(--chrome-dim); }
+  .facts b { color:var(--chrome-ink); font-weight:500; }
+  .chip {
+    display:inline-block; padding:2px 9px; border-radius:3px; font-size:10.5px; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase;
+    background:var(--chrome-hi); color:var(--chrome-ink); border:1px solid rgba(255,255,255,.18);
+  }
+  .chip.loc { background:#7ED0F5; color:#06344A; border-color:transparent; }
+  .chip.ep-open      { background:#1C8351; color:#fff; border-color:transparent; }
+  .chip.ep-discharged{ background:#B5760A; color:#fff; border-color:transparent; }
+  .chip.ep-closed    { background:#A62E1E; color:#fff; border-color:transparent; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .legend .chip { border:0; }
+  .plus {
+    font-family:"IBM Plex Sans",sans-serif; font-size:var(--fs-sm); font-weight:600;
+    padding:calc(var(--rowpy) - 1px) 13px; border-radius:4px; cursor:pointer;
+    background:var(--accent); border:1px solid var(--accent); color:#fff;
+  }
+  :root[data-theme="dark"] .plus, :root:not([data-theme="light"]) .plus { color:#06222F; }
+  .menu {
+    position:relative; display:inline-block;
+  }
+  .menu .items {
+    display:none; position:absolute; right:0; top:calc(100% + 5px); z-index:20;
+    background:var(--surface); border:1px solid var(--line-strong); border-radius:5px;
+    box-shadow:0 6px 20px rgba(0,0,0,.16); min-width:250px; overflow:hidden; text-align:left;
+  }
+  .menu.open .items { display:block; }
+  .menu .items a {
+    display:block; padding:8px 13px; text-decoration:none; color:var(--ink);
+    font-size:var(--fs-sm); border-top:1px solid var(--line);
+  }
+  .menu .items a:first-child { border-top:0; }
+  .menu .items a:hover { background:var(--surface-2); }
+  .menu .items .mh {
+    padding:6px 13px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; background:var(--surface-2); border-top:1px solid var(--line);
+  }
+  .hdrblock {
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
+    border-radius:5px; padding:7px 11px; max-width:400px;
+  }
+  .hdrblock .lbl {
+    font-size:9.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--chrome-dim); margin-bottom:2px;
+  }
+  .hdrblock .val { font-size:var(--fs-sm); color:var(--chrome-ink); line-height:1.45; }
+  .hdrblock.danger { background:#8E2418; border-color:transparent; }
+  .hdrblock.danger .lbl { color:rgba(255,255,255,.85); }
+  .hdrblock.danger .val { color:#fff; font-weight:500; }
+
+  /* ============ nav ============ */
+  .groupnav {
+    background:var(--chrome-hi); padding:0 18px; display:flex; overflow-x:auto;
+    border-bottom:1px solid rgba(0,0,0,.28);
+  }
+  .groupnav a {
+    padding:10px 17px; text-decoration:none; color:var(--chrome-dim);
+    font-size:13px; font-weight:600; white-space:nowrap; border-bottom:3px solid transparent;
+  }
+  .groupnav a:hover { color:var(--chrome-ink); background:rgba(255,255,255,.07); }
+  .groupnav a.on { color:#fff; border-bottom-color:var(--accent-d); background:rgba(255,255,255,.09); }
+  :root[data-theme="dark"] .groupnav a.on, :root:not([data-theme="light"]) .groupnav a.on { color:var(--chrome-ink); }
+  .groupnav .spacer { flex:1; }
+
+  .sectionbar {
+    background:var(--surface-2); border-bottom:1px solid var(--line); padding:0 18px;
+    display:flex; overflow-x:auto;
+  }
+  .sectionbar a {
+    padding:9px 15px; text-decoration:none; color:var(--ink-soft); font-size:13px;
+    font-weight:500; white-space:nowrap; border-bottom:3px solid transparent;
+  }
+  .sectionbar a:hover { color:var(--ink); background:var(--surface-3); }
+  .sectionbar a.on { color:var(--ink); border-bottom-color:var(--accent); font-weight:700; background:var(--surface); }
+  .sectionbar .count { margin-left:6px; }
+
+  .shell { display:grid; grid-template-columns:222px minmax(0,1fr); align-items:start; }
+  @media (max-width:880px) { .shell { grid-template-columns:1fr; } }
+  [data-nav="top"] .shell, [data-nav="flat"] .shell { grid-template-columns:1fr; }
+  [data-nav="top"] .rail, [data-nav="flat"] .rail { display:none; }
+  [data-nav="left"] .groupnav, [data-nav="both"] .sectionbar, [data-nav="flat"] .groupnav { display:none; }
+
+  .rail {
+    background:var(--surface-2); border-right:1px solid var(--line);
+    padding:var(--pad) 9px; display:flex; flex-direction:column; gap:1px; min-height:66vh;
+  }
+  @media (max-width:880px) {
+    .rail { min-height:0; border-right:0; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; }
+  }
+  .railhead {
+    font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);
+    font-weight:700; padding:0 9px var(--labmb); margin-top:2px;
+  }
+  .railhead + .railhead, .rail a + .railhead { margin-top:14px; }
+  @media (max-width:880px) { .railhead { width:100%; } }
+  .rail a {
+    padding:calc(var(--rowpy) + 1px) 9px; border-radius:4px; text-decoration:none;
+    color:var(--ink-soft); font-size:var(--fs); font-weight:500;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .rail a:hover { background:var(--surface-3); color:var(--ink); }
+  .rail a.on { background:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+  .count { font-size:11px; color:var(--ink-faint); font-weight:400; }
+  .rail a.on .count { color:var(--chrome-dim); }
+
+  main { padding:var(--pad) 18px calc(var(--pad) * 2); min-width:0; }
+
+  .phead { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:var(--gap); }
+  .ptitle {
+    font-family:"Source Serif 4",Georgia,serif; font-size:22px; font-weight:600;
+    margin:0; letter-spacing:-.01em;
+  }
+
+  /* ============ cards ============ */
+  .cols { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(0,1fr); gap:var(--gap); align-items:start; }
+  @media (max-width:1020px) { .cols { grid-template-columns:1fr; } }
+  .stack { display:flex; flex-direction:column; gap:var(--gap); }
+
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:5px; box-shadow:var(--shadow); overflow:hidden; }
+  .card > h2 {
+    margin:0; padding:calc(var(--rowpy) + 2px) var(--pad);
+    font-size:10.5px; letter-spacing:.11em; text-transform:uppercase; font-weight:700;
+    color:var(--ink-soft); border-bottom:1px solid var(--line); background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .card > h2 a { font-size:11px; letter-spacing:0; text-transform:none; font-weight:500; }
+  .card .body { padding:var(--pad); }
+
+  .fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:var(--stack) var(--gap); }
+  .f .k { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-bottom:var(--labmb); }
+
+  .list { display:flex; flex-direction:column; }
+  .row { padding:var(--rowpy) var(--pad); border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .row:first-child { border-top:0; }
+  .sub { color:var(--ink-soft); font-size:var(--fs-sm); }
+  .r { text-align:right; color:var(--ink-soft); font-size:var(--fs-sm); white-space:nowrap; }
+  .row.tot { background:var(--surface-2); font-weight:600; }
+  .row.issue { border-left:3px solid var(--alert); }
+  .row.issue.w { border-left-color:var(--warn); }
+
+  .tag { display:inline-block; padding:1px 7px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; vertical-align:1px; }
+  .tag.ok { background:var(--good-soft); color:var(--good); }
+  .tag.warn { background:var(--warn-soft); color:var(--warn); }
+  .tag.bad { background:var(--alert-soft); color:var(--alert); }
+  .tag.info { background:var(--accent-soft); color:var(--accent); }
+  .tag.mute { background:var(--surface-3); color:var(--ink-soft); }
+
+  .btn {
+    font-family:"IBM Plex Sans",sans-serif; font-size:var(--fs-sm); font-weight:500;
+    padding:calc(var(--rowpy) - 1px) 13px; border-radius:4px; cursor:pointer;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line-strong);
+    text-decoration:none; display:inline-block;
+  }
+  .btn:hover { background:var(--surface-2); }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .cbs { display:flex; flex-direction:column; gap:4px; }
+  .cb { display:flex; gap:9px; align-items:flex-start; padding:6px 9px; border-radius:4px;
+    border:1px solid var(--line); cursor:pointer; font-size:var(--fs-sm); background:var(--surface); }
+  .cb:hover { border-color:var(--line-strong); }
+  .cb.on { border-color:var(--accent); background:var(--accent-soft); }
+  .cb input { margin-top:2px; flex:0 0 auto; }
+  .pre { font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    background:var(--accent-soft); color:var(--accent); border-radius:3px; padding:1px 5px; }
+  .btn.off { background:var(--surface-3); border-color:var(--line-strong); color:var(--ink-faint); pointer-events:none; }
+  .demonote { font-size:var(--fs-sm); color:var(--ink-faint); font-style:italic; }
+  .demonote::before { content:"demo note — "; font-style:normal; font-weight:700; letter-spacing:.05em;
+    font-size:10px; text-transform:uppercase; }
+  select, input[type=text] { font-family:inherit; font-size:var(--fs); padding:7px 9px; width:100%;
+    border:1px solid var(--line-strong); border-radius:4px; background:var(--surface); color:var(--ink); }
+  :root[data-theme="dark"] .btn.primary, :root:not([data-theme="light"]) .btn.primary { color:#1A1206; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; }
+
+  .filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:var(--gap); }
+  .filters button {
+    font-family:"IBM Plex Sans",sans-serif; font-size:var(--fs-sm); font-weight:500;
+    padding:4px 11px; border-radius:20px; cursor:pointer;
+    border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft);
+  }
+  .filters button[aria-pressed="true"] { background:var(--chrome); border-color:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; font-size:var(--fs); }
+  th { text-align:left; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; padding:7px var(--pad); border-bottom:1px solid var(--line); background:var(--surface-2); white-space:nowrap; }
+  td { padding:var(--rowpy) var(--pad); border-top:1px solid var(--line); vertical-align:top; }
+  .tw { overflow-x:auto; }
+
+  details.day { border-top:1px solid var(--line); }
+  details.day:first-of-type { border-top:0; }
+  details.day > summary {
+    padding:var(--rowpy) var(--pad); cursor:pointer; display:flex;
+    justify-content:space-between; align-items:baseline; gap:12px; list-style:none;
+  }
+  details.day > summary::-webkit-details-marker { display:none; }
+  details.day > summary::before { content:"▸"; color:var(--ink-faint); margin-right:8px; font-size:11px; }
+  details.day[open] > summary::before { content:"▾"; }
+  details.day[open] > summary { background:var(--surface-2); font-weight:600; }
+  .daybody { background:var(--surface-2); padding:2px var(--pad) var(--rowpy) calc(var(--pad) + 18px); }
+  .dline { display:flex; justify-content:space-between; gap:12px; padding:4px 0; font-size:var(--fs-sm); border-top:1px dotted var(--line); }
+  .dline:first-child { border-top:0; }
+  .dline .z { color:var(--ink-faint); }
+
+  .stub .card .body { text-align:center; padding:calc(var(--pad) * 2.2) var(--pad); }
+
+  footer { padding:20px 18px 40px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--line); background:var(--surface-2); }
+  footer p { margin:0 0 7px; max-width:78ch; }
+  footer b { color:var(--ink-soft); }
+</style>
+
+<div id="app" data-nav="top">
+
+  <div class="control">
+    <b>Nav</b>
+    <div class="seg" role="group" aria-label="Navigation layout">
+      <button type="button" data-n="top" aria-pressed="true">Top, grouped</button>
+      <button type="button" data-n="flat" aria-pressed="false">Top, flat</button>
+      <button type="button" data-n="left" aria-pressed="false">Left only</button>
+      <button type="button" data-n="both" aria-pressed="false">Top + left</button>
+    </div>
+    <b style="margin-left:6px;">Palette</b>
+    <div class="seg" role="group" aria-label="Palette">
+      <button type="button" data-p="deep-cerulean" aria-pressed="true"><span class="sw" style="background:#0A4767"></span>Deep cerulean</button>
+      <button type="button" data-p="cerulean" aria-pressed="false"><span class="sw" style="background:#0F5F8A"></span>Lighter</button>
+      <button type="button" data-p="cerulean-gold" aria-pressed="false"><span class="sw" style="background:#E5BE55"></span>+ Gold</button>
+    </div>
+    <b style="margin-left:6px;">Episode</b>
+    <div class="seg" role="group" aria-label="Episode state">
+      <button type="button" data-e="open" aria-pressed="true">Open</button>
+      <button type="button" data-e="discharged" aria-pressed="false">Discharged</button>
+      <button type="button" data-e="closed" aria-pressed="false">Closed</button>
+    </div>
+    <b style="margin-left:6px;">Theme</b>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" data-t="light" aria-pressed="true">Light</button>
+      <button type="button" data-t="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+
+  <header class="idbar">
+    <div style="flex:1 1 300px; min-width:0;">
+      <h1>Whitfield, Marcus D.</h1>
+      <div class="facts">
+        <span>MRN <b class="mono">004821</b></span>
+        <span>DOB <b class="mono">03/14/1987</b> (39)</span>
+        <span>He/him</span>
+        <span>SSN <b class="mono">•••–••–4102</b></span>
+      </div>
+      <div class="facts" style="margin-top:7px; align-items:center;">
+        <span class="chip loc">ASAM 2.5 · PHP</span>
+        <span class="chip ep-open" id="epchip">Episode 2 · Open</span>
+        <span>Admitted <b class="mono">07/28/2026</b> · Day 24 · Riverside Bldg B</span>
+      </div>
+    </div>
+    <div class="hdrblock">
+      <div class="lbl">Diagnoses</div>
+      <div class="val">
+        <span class="mono">F11.20</span> Opioid use disorder, severe<br>
+        <span class="mono">F33.1</span> MDD, recurrent, moderate<br>
+        <span class="mono">F17.210</span> Nicotine dependence
+      </div>
+    </div>
+    <div class="hdrblock danger">
+      <div class="lbl">Allergies</div>
+      <div class="val">Penicillin — hives<br>Sulfonamides</div>
+    </div>
+  </header>
+
+  <nav class="groupnav" id="groupnav" aria-label="Chart groups">
+    <a href="#g=overview" data-g="overview" class="on">Overview</a>
+    <a href="#g=documentation" data-g="documentation">Documentation</a>
+    <a href="#g=careplan" data-g="careplan">Care Plan</a>
+    <a href="#g=billing" data-g="billing">Billing</a>
+    <span class="spacer"></span>
+    <a href="#g=timeline" data-g="timeline">Timeline &amp; Print</a>
+  </nav>
+
+  <nav class="sectionbar" id="sectionbar" aria-label="Sections"></nav>
+
+  <div class="shell">
+    <nav class="rail" id="rail" aria-label="Sections"></nav>
+    <main id="main"></main>
+  </div>
+
+  <footer>
+    <p><b>Throwaway layout study.</b> Fictional client, invented data, no production code.</p>
+    <p><b>Live:</b> nav layout, palette, light/dark, group + section routing, expandable billing days.
+      Sections without real content say so rather than pretending.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var app = document.getElementById('app'),
+      rail = document.getElementById('rail'),
+      sbar = document.getElementById('sectionbar'),
+      main = document.getElementById('main');
+
+  var GROUPS = {
+    overview:      { label:'Overview',   sections:[
+      {id:'face', name:'Face Sheet'}, {id:'attention', name:'Needs Attention', count:'3'},
+      {id:'consents',name:'Consents',count:'7'}, {id:'rois',name:'ROIs',count:'4'} ]},
+    documentation: { label:'Documentation', sections:[
+      {id:'clinical',name:'Clinical',count:'39'}, {id:'medical',name:'Medical / Nursing',count:'22'},
+      {id:'peer',name:'Peer Support',count:'14'}, {id:'casemgmt',name:'Case Management',count:'12'},
+      {id:'groups',name:'Group Notes',count:'61'}, {id:'assessments',name:'Assessments',count:'9'} ]},
+    careplan:      { label:'Care Plan', sections:[
+      {id:'tx',name:'Treatment Planning'}, {id:'discharge',name:'Discharge Planning'},
+      {id:'meds',name:'Medications',count:'3'} ]},
+    billing:       { label:'Billing', sections:[
+      {id:'hours',name:'Service Hours'}, {id:'auths',name:'Authorizations',count:'3'},
+      {id:'claims',name:'Claims',count:'4'}, {id:'dnb',name:'Do-Not-Bill',count:'1'} ]},
+    timeline:      { label:'Timeline & Print', sections:[
+      {id:'timeline',name:'Timeline',count:'148'}, {id:'print',name:'Print / Export Chart'} ]}
+  };
+  function allSections(){
+    var out = [];
+    Object.keys(GROUPS).forEach(function(gid){
+      GROUPS[gid].sections.forEach(function(s){ out.push({ g:gid, s:s }); });
+    });
+    return out;
+  }
+
+  function f(k,v){ return '<div class="f"><div class="k">'+k+'</div><div>'+v+'</div></div>'; }
+  function row(l,r,cls){ return '<div class="row '+(cls||'')+'"><div>'+l+'</div><div class="r">'+r+'</div></div>'; }
+  function head(title, extra){
+    return '<div class="phead"><h2 class="ptitle">'+title+'</h2><div class="actions">'+
+      (extra||'')+'<a class="btn" href="#print-page">Print this page</a></div></div>';
+  }
+  function menu(label, groups){
+    var items = groups.map(function(g){
+      return '<div class="mh">'+g[0]+'</div>' + g[1].map(function(n){
+        return '<a href="#new">'+n+'</a>'; }).join('');
+    }).join('');
+    return '<span class="menu"><button type="button" class="plus">+ '+label+'</button>' +
+           '<span class="items">'+items+'</span></span>';
+  }
+  function cl(wk,svc,code,u,amt,st,note){
+    return '<tr><td class="mono">'+wk+'</td><td><b>'+svc+'</b></td><td>'+code+
+      '</td><td class="mono">'+u+'</td><td class="mono">'+amt+'</td><td>'+st+'</td><td class="sub">'+note+'</td></tr>';
+  }
+  function au(no,ty,lv,pd,u,st,docs){
+    return '<tr><td class="mono">'+no+'</td><td>'+ty+'</td><td>'+lv+'</td><td class="mono">'+pd+
+      '</td><td class="mono">'+u+'</td><td>'+st+'</td><td class="sub">'+docs+'</td></tr>';
+  }
+  function as(d,n,ty,a,st){
+    return '<tr><td class="mono">'+d+'</td><td><b>'+n+'</b></td><td>'+ty+'</td><td>'+a+'</td><td>'+st+'</td></tr>';
+  }
+
+  var P = {};
+
+  P.face = head('Face Sheet') +
+    '<div class="cols"><div class="stack">' +
+    '<section class="card"><h2>Demographics <a href="#edit">Edit</a></h2><div class="body"><div class="fields">' +
+      f('Legal name','Marcus Dwayne Whitfield')+f('Preferred name','Marc')+
+      f('Date of birth','<span class="mono">03/14/1987</span>')+f('Age','<span class="mono">39</span>')+
+      f('Gender','Male · He/him')+f('Race / ethnicity','Black or African American · Not Hispanic')+
+      f('SSN','<span class="mono">•••–••–4102</span>')+f('Phone','<span class="mono">(804) 555–0173</span>')+
+      f('Address','1408 Fielder St, Apt 3<br>Richmond, VA 23220')+f('Preferred contact','Text message')+
+    '</div></div></section>' +
+    '<section class="card"><h2>Episode &amp; level of care</h2><div class="body"><div class="fields">' +
+      f('Current LOC','ASAM 2.5 — Partial Hospitalization')+f('Admitted','<span class="mono">07/28/2026</span>')+
+      f('Episode state','Open · Episode 2 of 2')+f('Location','Riverside Campus — Bldg B')+
+      f('Service auth','Approved thru <span class="mono">09/25/2026</span>')+
+      f('ISP review due','<span class="mono">08/27/2026</span>')+
+    '</div><div class="actions" style="margin-top:var(--gap)">' +
+      '<a class="btn" href="#transfer">Transfer level of care</a><a class="btn" href="#discharge">Discharge</a>' +
+      '<a class="btn" href="#history">Episode history</a></div></div></section>' +
+    '<section class="card"><h2>Diagnoses on chart</h2><div class="list">' +
+      row('<span class="mono" style="color:var(--accent)">F11.20</span> Opioid use disorder, severe <span class="sub">— principal</span>','07/28/2026 · Okonkwo, MD')+
+      row('<span class="mono" style="color:var(--accent)">F33.1</span> Major depressive disorder, recurrent, moderate','07/28/2026 · Okonkwo, MD')+
+      row('<span class="mono" style="color:var(--accent)">F17.210</span> Nicotine dependence, cigarettes','08/04/2026 · Reyes, CSAC')+
+    '</div></section>' +
+    '</div><div class="stack">' +
+    '<section class="card"><h2>Coverage</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
+      f('Plan','Anthem HealthKeepers Plus<br><span class="sub">Cardinal Care · Medicaid MCO</span>')+
+      f('Member ID','<span class="mono">YHA804291733</span>')+
+      f('Authorization','SA <span class="mono">#A-77213</span> · thru <span class="mono">09/25/2026</span>')+
+    '</div></div></section>' +
+    '<section class="card"><h2>Care team</h2><div class="list">' +
+      row('<b>Dana Reyes, CSAC</b><br><span class="sub">Primary counselor</span>','Since 07/28')+
+      row('<b>Priya Okonkwo, MD</b><br><span class="sub">Addiction medicine</span>','Since 07/28')+
+      row('<b>Tomás Iyer</b><br><span class="sub">Case manager</span>','Since 07/30')+
+      row('<b>Renee Hollis, CPRS</b><br><span class="sub">Peer recovery specialist</span>','Since 08/03')+
+      row('<b>Alan Brody, LCSW</b><br><span class="sub">Clinical supervisor</span>','Since 07/28')+
+    '</div></section>' +
+    '<section class="card"><h2>Emergency contact</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
+      f('Primary','Lorraine Whitfield — mother<br><span class="mono">(804) 555–0288</span>')+
+      f('ROI on file','Yes · expires <span class="mono">01/28/2027</span>')+
+      f('Secondary','Devon Whitfield — brother<br><span class="mono">(804) 555–0341</span>')+
+    '</div></div></section>' +
+    '</div></div>';
+
+  P.attention = head('Needs Attention') +
+    '<div class="stack" style="max-width:820px">' +
+    '<section class="card"><h2>Open items · 3</h2><div class="list">' +
+      row('<b>ISP review due 08/27</b><br><span class="sub">30-day review · Dana Reyes, CSAC</span>','<span class="tag warn">6 days</span>','issue w')+
+      row('<b>Wed 08/19 — 3.50 hrs, under 5</b><br><span class="sub">ISP deviation note required · weekly MCO notice</span>','<span class="tag warn">2 days</span>','issue w')+
+      row('<b>Consent to treat — annual renewal</b><br><span class="sub">Expires 09/12/2026</span>','<span class="tag info">22 days</span>')+
+    '</div></section>' +
+    '<p class="sub">Deliberately its own section, not part of the face sheet — a face sheet printed for ' +
+    'a hospital shouldn\'t carry the agency\'s internal to-do list.</p></div>';
+
+  P.groups = head('Group Notes') +
+    '<div class="filters">' +
+      '<button type="button" aria-pressed="true">All 61</button><button type="button" aria-pressed="false">Present 54</button>' +
+      '<button type="button" aria-pressed="false">Absent 7</button><button type="button" aria-pressed="false">Unsigned 2</button>' +
+      '<button type="button" aria-pressed="false">Flagged 1</button></div>' +
+    '<section class="card"><div class="tw"><table><thead><tr>' +
+      '<th>Date</th><th>Group</th><th>Facilitator</th><th>Attendance</th><th>Participation</th><th>Status</th>' +
+    '</tr></thead><tbody>' +
+      gr('08/20','Relapse Prevention','Reyes, CSAC','9:00–10:30','Active','<span class="tag ok">Signed</span>')+
+      gr('08/20','Process Group','Brody, LCSW','13:00–14:00','Engaged','<span class="tag ok">Signed</span>')+
+      gr('08/19','Coping Skills','Hollis, CPRS','9:00–9:30, 10:00–10:30','Minimal','<span class="tag warn">Unsigned</span>')+
+      gr('08/19','Health Literacy','Reyes, CSAC','11:00–12:00','Active','<span class="tag bad">Overlap</span>')+
+      gr('08/18','Relapse Prevention','Reyes, CSAC','9:00–10:30','Active','<span class="tag ok">Signed</span>')+
+      gr('08/18','Family Education','Brody, LCSW','—','Absent','<span class="tag ok">Signed</span>')+
+      gr('08/17','Process Group','Brody, LCSW','13:00–14:00','Engaged','<span class="tag ok">Signed</span>')+
+    '</tbody></table></div></section>' +
+    '<p class="sub" style="margin-top:var(--gap)">Segmented times (08/19) show as entered — one note, ' +
+    'two intervals, no addendum.</p>';
+
+  P.hours = head('Service Hours') +
+    '<div class="cols"><div class="stack">' +
+    '<section class="card"><h2>Week of 08/16 – 08/22 · ASAM 2.5 · min 5 hrs/day, 20 hrs/week</h2>' +
+      day('Mon 08/17','5.25','ok','Met',[
+        ['Relapse Prevention','9:00–10:30','1.50','counts'],
+        ['Health Literacy','11:00–12:00','1.00','counts'],
+        ['Process Group','13:00–14:00','1.00','counts'],
+        ['Individual session','14:00–15:45','1.75','counts']]) +
+      day('Tue 08/18','5.00','ok','Met',[
+        ['Relapse Prevention','9:00–10:30','1.50','counts'],
+        ['Family Education','11:00–12:30','1.50','counts'],
+        ['Process Group','13:00–14:00','1.00','counts'],
+        ['Case management','14:00–15:00','1.00','counts']]) +
+      day('Wed 08/19','3.50','warn','Under 5',[
+        ['Coping Skills','9:00–9:30','0.50','counts'],
+        ['Coping Skills','10:00–10:30','0.50','counts'],
+        ['Health Literacy','11:00–12:00','1.00','counts'],
+        ['Individual session','13:00–14:30','1.50','counts'],
+        ['Peer recovery support','14:30–15:00','0.00','billable separately — not PHP hours'],
+        ['Treatment team','15:00–16:00','0.00','non-billable type']]) +
+      day('Thu 08/20','5.50','ok','Met',[
+        ['Relapse Prevention','9:00–10:30','1.50','counts'],
+        ['Health Literacy','11:00–12:00','1.00','counts'],
+        ['Process Group','13:00–14:00','1.00','counts'],
+        ['Individual session','14:00–16:00','2.00','counts'],
+        ['Peer recovery support','16:00–16:30','0.00','billable separately — not PHP hours']]) +
+      '<div class="row"><div><b>Fri 08/21</b> <span class="sub">Scheduled</span></div><div class="r">—</div></div>' +
+      '<div class="row tot"><div>Week to date</div><div class="r"><span class="mono">19.25 of 20 hrs</span></div></div>' +
+    '</section>' +
+    '<section class="card"><h2>Checks for this client · 3 open</h2><div class="list">' +
+      row('<b>Overlap — 08/19</b><br><span class="sub">Health Literacy 11:00–12:00 vs. Individual session 11:30–12:00 · both unsigned</span>',
+          '<a href="#doc-441">Health Literacy</a><br><a href="#doc-447">Individual</a>','issue')+
+      row('<b>Unsigned past due — 08/19</b><br><span class="sub">Coping Skills · Hollis, CPRS · due 08/20</span>',
+          '<a href="#doc-438">Open note</a>','issue')+
+      row('<b>Under minimum hours — 08/19</b><br><span class="sub">3.50 of 5.00 · deviation note + weekly MCO notice required</span>',
+          '<a href="#dev-819">Add deviation</a>','issue w')+
+      row('<span class="sub">Duplicate services</span>','<span class="tag ok">Clear</span>')+
+      row('<span class="sub">Episode routing</span>','<span class="tag ok">Clear</span>')+
+      row('<span class="sub">Concurrent level of care</span>','<span class="tag ok">Clear</span>')+
+      row('<span class="sub">Service authorization coverage</span>','<span class="tag ok">Clear</span>')+
+    '</div></section>' +
+    '</div><div class="stack">' +
+    '<section class="card"><h2>Separately billable this week</h2><div class="list">' +
+      row('Peer recovery support <span class="sub">08/19 · 14:30–15:00</span>','<span class="mono">0.50 hr</span>')+
+      row('Peer recovery support <span class="sub">08/20 · 16:00–16:30</span>','<span class="mono">0.50 hr</span>')+
+      '<div class="row tot"><div>Own claim lines</div><div class="r"><span class="mono">2 services</span></div></div>'+
+    '</div><div class="body" style="border-top:1px solid var(--line)"><p class="sub" style="margin:0">' +
+    'Billable, but outside the PHP per-diem hour count — separate claim lines, not part of the 5-hour test.</p></div></section>' +
+    '<section class="card"><h2>Week at a glance</h2><div class="list">' +
+      row('Days meeting minimum','<span class="mono">3 of 4</span>')+
+      row('Hours toward PHP','<span class="mono">19.25 of 20</span>')+
+      row('Separately billable','<span class="mono">1.00 hr</span>')+
+      row('Non-billable documented','<span class="mono">1.00 hr</span>')+
+    '</div></section></div></div>';
+
+  P.auths = head('Authorizations', menu('New request', [
+      ['ARTS service authorization', ['Initial request — ASAM 2.5','Extension request — ASAM 2.5','Level of care change']],
+      ['Other payer forms', ['Continued stay review','Discharge notification']]
+    ])) +
+    '<div class="cols"><div class="stack">' +
+    '<section class="card"><h2>Current authorization</h2><div class="body"><div class="fields">' +
+      f('Auth number','<span class="mono">A-77213</span>')+
+      f('Payer','Anthem HealthKeepers Plus')+
+      f('Level of care','ASAM 2.5 — PHP <span class="mono">S0201</span>')+
+      f('Approved period','<span class="mono">07/28 – 09/25/2026</span>')+
+      f('Units approved','<span class="mono">42</span> <span class="sub">1 unit = 1 day</span>')+
+      f('Units used','<span class="mono">24</span> · <span class="mono">18</span> remaining')+
+    '</div><div class="actions" style="margin-top:var(--gap)">' +
+      '<a class="btn primary" href="#extend">Start extension request</a>' +
+      '<a class="btn" href="#auth-doc">View approval letter</a>' +
+      '<a class="btn" href="#upload">Upload correspondence</a>' +
+    '</div></div></section>' +
+    '<section class="card"><h2>Authorization history</h2><div class="tw"><table><thead><tr>' +
+      '<th>Auth #</th><th>Type</th><th>Level</th><th>Period</th><th>Units</th><th>Status</th><th>Documents</th>' +
+    '</tr></thead><tbody>' +
+      au('A-77213','Initial','2.5 PHP','07/28 – 09/25/26','42','<span class="tag ok">Approved</span>','Request · Approval') +
+      au('A-71880','Extension','2.1 IOP','05/02 – 06/30/26','21','<span class="tag mute">Expired</span>','Request · Approval') +
+      au('A-70344','Initial','2.1 IOP','03/14 – 05/01/26','21','<span class="tag mute">Expired</span>','Request · Approval') +
+    '</tbody></table></div></section>' +
+    '<section class="card"><h2>Extension request — draft</h2><div class="body">' +
+      '<p class="sub" style="margin:0 0 var(--gap)">Pre-filled from the chart. Nothing below was typed.</p>' +
+      '<div class="list" style="margin:0 calc(var(--pad) * -1)">' +
+      row('Member name · DOB · Medicaid ID','<span class="sub">Demographics</span>')+
+      row('ICD-10 codes 1–3','<span class="sub">Diagnoses on chart</span>')+
+      row('ASAM level · billing code <span class="mono">S0201</span>','<span class="sub">Current episode</span>')+
+      row('Existing auth number <span class="mono">A-77213</span>','<span class="sub">This page</span>')+
+      row('Provider group · NPI · contacts','<span class="sub">Tenant config + care team</span>')+
+      row('Medications · drug screens','<span class="sub">Medications, results</span>')+
+      row('<b>Member progress under current plan</b>','<span class="sub">Objective progress data</span>')+
+      row('<b>Revised treatment goals</b>','<span class="sub">Current ISP objectives</span>')+
+      row('<b>Discharge plan / disposition</b>','<span class="sub">Discharge planning</span>')+
+      row('Signature block','<span class="sub">Stored signature + credential</span>')+
+      '</div>' +
+      '<div class="actions" style="margin-top:var(--gap)">' +
+      '<a class="btn primary" href="#gen">Sign &amp; generate .docx</a>' +
+      '<a class="btn" href="#review">Review narratives</a></div>' +
+      '<p class="sub" style="margin:var(--gap) 0 0">The generated document is filed to the chart with a ' +
+      'snapshot of the values as of generation — so what you sent stays what you sent, even after the ' +
+      'chart moves on.</p>' +
+    '</div></section>' +
+    '</div><div class="stack">' +
+    '<section class="card"><h2>Watch list</h2><div class="list">' +
+      row('<b>Auth expires 09/25</b><br><span class="sub">18 units remaining · ~14 service days</span>','<span class="tag warn">35 days</span>','issue w')+
+      row('<b>Extension window opens 09/04</b><br><span class="sub">MCO responds within 72 hours</span>','<span class="tag info">14 days</span>')+
+      row('Units burn rate','<span class="mono">4.2 / week</span>')+
+      row('Projected exhaustion','<span class="mono">09/22</span>')+
+    '</div></section>' +
+    '<section class="card"><h2>Correspondence</h2><div class="list">' +
+      row('<b>Approval letter — A-77213</b><br><span class="sub">Received 07/29 · PDF</span>','<a href="#f1">Open</a>')+
+      row('<b>Initial request — A-77213</b><br><span class="sub">Submitted 07/28 · DOCX</span>','<a href="#f2">Open</a>')+
+      row('<b>Expiration notice — A-71880</b><br><span class="sub">Received 06/25 · PDF</span>','<a href="#f3">Open</a>')+
+    '</div><div class="body" style="border-top:1px solid var(--line)">' +
+      '<div class="actions"><a class="btn" href="#scan">Scan / upload</a></div></div></section>' +
+    '<section class="card"><h2>Submitted, awaiting response</h2><div class="list">' +
+      row('<span class="sub">Nothing outstanding</span>','<span class="tag ok">Clear</span>')+
+    '</div><div class="body" style="border-top:1px solid var(--line)"><p class="sub" style="margin:0">' +
+      'A request with no recorded response past the payer\'s window becomes a finding.</p></div></section>' +
+    '</div></div>';
+
+  P.claims = head('Claims') +
+    '<div class="filters">' +
+      '<button type="button" aria-pressed="true">All</button><button type="button" aria-pressed="false">Open</button>' +
+      '<button type="button" aria-pressed="false">Paid</button><button type="button" aria-pressed="false">Denied</button></div>' +
+    '<section class="card"><div class="tw"><table><thead><tr>' +
+      '<th>Service week</th><th>Service</th><th>Code</th><th>Units</th><th>Amount</th><th>Status</th><th>Notes</th>' +
+    '</tr></thead><tbody>' +
+      cl('08/16 – 08/22','PHP per diem','<span class="mono">S0201</span>','4','$1,124.00','<span class="tag mute">Not submitted</span>','Week open') +
+      cl('08/09 – 08/15','PHP per diem','<span class="mono">S0201</span>','5','$1,405.00','<span class="tag info">Submitted</span>','08/18') +
+      cl('08/09 – 08/15','Peer recovery support','<span class="mono">H0038</span>','4','$96.00','<span class="tag info">Submitted</span>','08/18') +
+      cl('08/02 – 08/08','PHP per diem','<span class="mono">S0201</span>','4','$1,124.00','<span class="tag ok">Paid</span>','08/14 · $1,124.00') +
+      cl('07/26 – 08/01','PHP per diem','<span class="mono">S0201</span>','3','$843.00','<span class="tag ok">Paid</span>','08/07 · partial week') +
+    '</tbody></table></div></section>' +
+    '<div class="cols" style="margin-top:var(--gap)"><div class="stack">' +
+    '<section class="card"><h2>Blocking submission · week of 08/16</h2><div class="list">' +
+      row('<b>Unsigned note — 08/19</b><br><span class="sub">Coping Skills · Hollis, CPRS</span>','<a href="#doc-438">Open note</a>','issue')+
+      row('<b>Unresolved overlap — 08/19</b><br><span class="sub">Health Literacy vs. Individual session</span>','<a href="#doc-441">Review</a>','issue')+
+    '</div><div class="body" style="border-top:1px solid var(--line)"><p class="sub" style="margin:0">' +
+    'A signature is what makes a service billable — so an unsigned note is not a documentation problem, ' +
+    'it is an unbilled day.</p></div></section>' +
+    '</div><div class="stack">' +
+    '<section class="card"><h2>Authorization</h2><div class="list">' +
+      row('SA <span class="mono">#A-77213</span> · thru <span class="mono">09/25</span>','<span class="tag ok">Active</span>')+
+      row('Units remaining','<span class="mono">18 of 42</span>')+
+    '</div><div class="body" style="border-top:1px solid var(--line)">' +
+      '<div class="actions"><a class="btn" href="#g=billing&s=auths" data-g2="billing" data-s="auths">Authorizations</a></div>' +
+    '</div></section></div></div>';
+
+  P.dnb = head('Do-Not-Bill') +
+    '<div class="cols"><div class="stack">' +
+    '<section class="card"><h2>Active and historical</h2><div class="list">' +
+      row('<b>08/06 — full day</b><br><span class="sub">Client hospitalized · C. Ruiz, QA · set 08/07</span>','<span class="tag info">Active</span>')+
+      row('<b>07/31 — Peer recovery support only</b><br><span class="sub">Duplicate service entered · M. Okafor, Billing · set 08/03</span>','<span class="tag mute">Historical</span>')+
+    '</div></section>' +
+    '<section class="card"><h2>Effect of an active marker</h2><div class="list">' +
+      row('Claim generation','Suppressed for the covered scope')+
+      row('Hours-not-met flag','Suppressed — service was not expected')+
+      row('Missing-documentation flag','Suppressed')+
+      row('Overlap detection','<b>Still runs</b> — never suppressed')+
+      row('Duplicate detection','<b>Still runs</b> — never suppressed')+
+    '</div></section>' +
+    '</div><div class="stack">' +
+    '<section class="card"><h2>New marker</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
+      f('Scope','<span class="sub">Whole day · time range · single service</span>')+
+      f('Reason code','<span class="sub">Required</span>')+
+      f('Block note creation','<span class="sub">Optional, per agency config</span>')+
+      f('Who can set','<span class="sub">Finance · QA · Clinical director</span>')+
+    '</div><div class="actions" style="margin-top:var(--gap)">' +
+    '<a class="btn primary" href="#dnb-new">Mark do-not-bill</a></div></div></section>' +
+    '</div></div>';
+
+  P.assessments = head('Assessments', menu('New assessment', [
+      ['Intake', ['Multidimensional Assessment (ASAM)','Biopsychosocial','Nursing intake']],
+      ['Ongoing', ['ASAM continued-stay review','Suicide risk screen','Withdrawal (CIWA / COWS)']],
+      ['Discharge',['Discharge summary assessment']]
+    ])) +
+    '<section class="card"><div class="tw"><table><thead><tr>' +
+      '<th>Date</th><th>Assessment</th><th>Author</th><th>Also filed under</th><th>Status</th>' +
+    '</tr></thead><tbody>' +
+      as('08/14','ASAM continued-stay review','Reyes, CSAC','Clinical','<span class="tag ok">Signed</span>')+
+      as('08/04','Nursing reassessment','Vance, RN','Medical / Nursing','<span class="tag ok">Signed</span>')+
+      as('07/29','Biopsychosocial','Reyes, CSAC','Clinical','<span class="tag ok">Signed</span>')+
+      as('07/28','Multidimensional Assessment (ASAM)','Reyes, CSAC','Clinical','<span class="tag ok">Signed</span>')+
+      as('07/28','Nursing intake','Vance, RN','Medical / Nursing','<span class="tag ok">Signed</span>')+
+      as('07/28','Suicide risk screen','Vance, RN','Medical / Nursing','<span class="tag ok">Signed</span>')+
+    '</tbody></table></div></section>' +
+    '<p class="sub" style="margin-top:var(--gap)"><b>Sections are saved filters, not folders.</b> Every ' +
+    'assessment here also appears in its author\'s discipline tab — same document, two views. Nothing is ' +
+    'duplicated and nothing has to be filed twice.</p>';
+
+  P.clinical = head('Clinical', menu('New note', [
+      ['Notes', ['Individual session','Clinical progress note','Collateral contact','Treatment team']],
+      ['Assessments', ['Multidimensional Assessment (ASAM)','Biopsychosocial','ASAM continued-stay review']],
+      ['Planning', ['ISP','ISP review','Discharge plan']]
+    ])) +
+    '<div class="filters">' +
+      '<button type="button" aria-pressed="true">All 39</button><button type="button" aria-pressed="false">Notes 30</button>' +
+      '<button type="button" aria-pressed="false">Assessments 6</button><button type="button" aria-pressed="false">Planning 3</button>' +
+      '<button type="button" aria-pressed="false">Unsigned 1</button></div>' +
+    '<section class="card"><div class="tw"><table><thead><tr>' +
+      '<th>Date</th><th>Document</th><th>Type</th><th>Author</th><th>Status</th>' +
+    '</tr></thead><tbody>' +
+      as('08/20','Individual session','Note','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      as('08/18','Collateral contact — mother','Note','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      as('08/17','Individual session','Note','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      as('08/14','ASAM continued-stay review','Assessment','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      as('08/14','ISP review','Planning','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      as('08/13','Individual session','Note','Reyes, CSAC','<span class="tag warn">Unsigned</span>')+
+      as('07/29','Biopsychosocial','Assessment','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+    '</tbody></table></div></section>';
+
+  P.timeline = head('Timeline') +
+    '<div class="filters">' +
+      '<button type="button" aria-pressed="true">Everything</button><button type="button" aria-pressed="false">Clinical</button>' +
+      '<button type="button" aria-pressed="false">Medical</button><button type="button" aria-pressed="false">Peer</button>' +
+      '<button type="button" aria-pressed="false">Case mgmt</button><button type="button" aria-pressed="false">Planning</button>' +
+      '<button type="button" aria-pressed="false">Admin</button></div>' +
+    '<div class="filters" style="margin-top:-6px">' +
+      '<button type="button" aria-pressed="false">Hide group notes</button>' +
+      '<button type="button" aria-pressed="false">Unsigned only</button>' +
+      '<button type="button" aria-pressed="false">Last 7 days</button></div>' +
+    '<section class="card"><div class="tw"><table><thead><tr>' +
+      '<th>Date</th><th>Document</th><th>Discipline</th><th>Author</th><th>Status</th>' +
+    '</tr></thead><tbody>' +
+      tl('08/20','Individual session','Clinical','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      tl('08/20','Group note — Relapse Prevention','Clinical','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      tl('08/19','Nursing assessment','Medical','Okonkwo, MD','<span class="tag ok">Signed</span>')+
+      tl('08/19','Group note — Coping Skills','Clinical','Hollis, CPRS','<span class="tag warn">Unsigned</span>')+
+      tl('08/18','Case management contact','Case mgmt','Iyer','<span class="tag ok">Signed</span>')+
+      tl('08/17','Peer recovery check-in','Peer','Hollis, CPRS','<span class="tag ok">Signed</span>')+
+      tl('08/14','ISP review','Planning','Reyes, CSAC','<span class="tag ok">Signed</span>')+
+      tl('08/06','Do-not-bill — full day','Admin','Ruiz, QA','<span class="tag info">Active</span>')+
+    '</tbody></table></div></section>' +
+    '<p class="sub" style="margin-top:var(--gap)">LS buries its timeline because group notes flood it and ' +
+    'nothing filters. <b>Hide group notes</b> is the switch that fixes that — they stay one click away and ' +
+    'have their own section anyway.</p>';
+
+  P.print = head('Print / Export Chart','') +
+    '<div class="cols"><div class="stack">' +
+    '<section class="card"><h2>Select documents</h2><div class="list">' +
+      row('<b>Face sheet &amp; demographics</b>','1 page')+
+      row('<b>Clinical documentation</b> <span class="sub">39 documents</span>','select…')+
+      row('<b>Medical / nursing</b> <span class="sub">22 documents</span>','select…')+
+      row('<b>Group notes</b> <span class="sub">61 documents</span>','select…')+
+      row('<b>Treatment plan &amp; reviews</b> <span class="sub">6 documents</span>','select…')+
+      row('<b>Consents &amp; ROIs</b> <span class="sub">11 documents</span>','select…')+
+      row('<span class="sub">Needs Attention</span>','<span class="tag mute">Never exported</span>')+
+    '</div></section></div><div class="stack">' +
+    '<section class="card"><h2>Disclosure</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
+      f('Purpose','<span class="sub">Required — continuity of care, records request, audit, subpoena…</span>')+
+      f('Recipient','<span class="sub">Checked against ROIs on file</span>')+
+      f('42 CFR Part 2','<span class="tag warn">SUD records — consent-scoped</span>')+
+    '</div><p class="sub" style="margin:var(--gap) 0 0">Every export is logged: who, when, which documents, ' +
+    'to whom, for what purpose.</p><div class="actions" style="margin-top:var(--gap)">' +
+    '<a class="btn primary" href="#export">Generate export</a></div></div></section>' +
+    '<section class="card"><h2>Recent exports</h2><div class="list">' +
+      row('<b>08/11 — Continuity of care</b><br><span class="sub">To: Southside Primary · Reyes</span>','12 docs')+
+      row('<b>07/29 — Records request</b><br><span class="sub">To: client · Ruiz, QA</span>','Full chart')+
+    '</div></section></div></div>';
+
+
+  /* ---------- releases of information ----------
+     ONE form definition. Presets are saved sets of default values for that form —
+     authored entirely by the tenant, including which boxes are ticked. Nothing here
+     is a product opinion about scope. */
+
+  var ROI_PURPOSE = [
+    'To facilitate referral for additional services',
+    'To aid in diagnosis, continuing care and treatment',
+    'To assist in Discharge Planning',
+    'To facilitate understanding and support in treatment',
+    'Verification of Insurance Benefits and Utilization Review',
+    'Case Management',
+    'Care Coordination'
+  ];
+  var ROI_INFO = [
+    'Admission/Discharge Information including Diagnosis',
+    'Financial Information',
+    'Assessment and Treatment Recommendations',
+    'Urine Drug Screen/Breathalyzer Results',
+    'Treatment Compliance and Attendance',
+    'Progress and Treatment Reports',
+    'Treatment Plan including Treatment Goal Progress',
+    'History & Physical/Psych Evaluation/Consultations',
+    'Family Therapy',
+    'Couples Therapy',
+    'Lab Orders/Results',
+    'Other'
+  ];
+  var CONTACT_FIELDS = [
+    ['name','Name'], ['rel','Relationship'], ['org','Organization'], ['addr','Address'],
+    ['city','City'], ['state','State'], ['zip','Zip'], ['phone','Phone'],
+    ['fax','Fax'], ['mobile','Mobile Phone'], ['work','Work/Direct Phone'], ['email','E-Mail']
+  ];
+
+  /* Disclosure recipient directory — organizations, tenant-managed in Configure.
+     One record per organization; presets reference it by ID rather than copying it. */
+  var DIRECTORY = [
+    { id:'D-01', type:'Hospital', org:'VCU Medical Center', addr:'1250 E Marshall St',
+      city:'Richmond', state:'VA', zip:'23298', phone:'(804) 555-0140', fax:'(804) 555-0141',
+      email:'records@vcuhealth.example' },
+    { id:'D-02', type:'Hospital', org:'Richmond Community Hospital', addr:'1500 N 28th St',
+      city:'Richmond', state:'VA', zip:'23223', phone:'(804) 555-0188', fax:'(804) 555-0189',
+      email:'him@rch.example' },
+    { id:'D-03', type:'Hospital', org:'Chippenham Hospital', addr:'7101 Jahnke Rd',
+      city:'Richmond', state:'VA', zip:'23225', phone:'(804) 555-0122', fax:'(804) 555-0123',
+      email:'records@chippenham.example' },
+    { id:'D-04', type:'Primary care', org:'Southside Primary Care', addr:'4600 Hull Street Rd',
+      city:'Richmond', state:'VA', zip:'23224', phone:'(804) 555-0193', fax:'(804) 555-0194',
+      email:'front@southsidepc.example' },
+    { id:'D-05', type:'Legal', org:'Richmond City Probation', addr:'701 N 25th St',
+      city:'Richmond', state:'VA', zip:'23223', phone:'(804) 555-0171', fax:'(804) 555-0172',
+      email:'' },
+    { id:'D-06', type:'FQHC', org:'Daily Planet Health Services', addr:'517 W Grace St',
+      city:'Richmond', state:'VA', zip:'23220', phone:'(804) 555-0155', fax:'(804) 555-0156',
+      email:'roi@dailyplanet.example' }
+  ];
+  function dirOf(id){ return DIRECTORY.filter(function(d){ return d.id===id; })[0]; }
+
+  /* Tenant-authored presets. Each may prefill any part of the form, or none of it. */
+  var ROI_PRESETS = [
+    { id:'P-01', name:'VCU Medical Center', group:'Contact + scope prefilled',
+      title:'Release of Information: Hospital — {org}',
+      dir:'D-01', contact:{}, purpose:[1,2], info:[0,2,5] },
+    { id:'P-02', name:'Richmond Community Hospital', group:'Contact + scope prefilled',
+      title:'Release of Information: Hospital — {org}',
+      dir:'D-02', contact:{}, purpose:[1,2], info:[0,2,5] },
+    { id:'P-03', name:'Emergency contact', group:'Scope prefilled, contact blank',
+      title:'Release of Information: Emergency Contact — {name}',
+      contact:{}, purpose:[3], info:[0] },
+    { id:'P-04', name:'Probation / court', group:'Scope prefilled, contact blank',
+      title:'Release of Information: Probation — {org}',
+      contact:{}, purpose:[6], info:[4] },
+    { id:'P-05', name:'Referral out', group:'Scope prefilled, contact blank',
+      title:'Release of Information: Referral — {org}',
+      contact:{}, purpose:[0,2], info:[0,2] },
+    { id:'P-06', name:'Blank ROI', group:'Nothing prefilled',
+      title:'Release of Information: {org}',
+      contact:{}, purpose:[], info:[] }
+  ];
+
+  var rois = [
+    { title:'Release of Information: Emergency Contact — Lorraine Whitfield',
+      to:'Lorraine Whitfield (mother)', signed:'07/28/2026', exp:'07/28/2027', st:'active' },
+    { title:'Release of Information: Hospital — VCU Medical Center',
+      to:'VCU Medical Center', signed:'07/28/2026', exp:'07/28/2027', st:'active' },
+    { title:'Release of Information: Referral — Southside Primary Care',
+      to:'Southside Primary Care', signed:'07/29/2026', exp:'07/29/2027', st:'active' },
+    { title:'Release of Information: Hospital — Chippenham Hospital',
+      to:'Chippenham Hospital', signed:'02/14/2025', exp:'02/14/2026', st:'expired' }
+  ];
+
+  var roiOpen = null, roiC = {}, roiP = [], roiI = [], roiLimit = false, roiFrom = null;
+
+  function presetOf(id){ return ROI_PRESETS.filter(function(p){ return p.id===id; })[0]; }
+  var roiDir = null;
+  function applyDir(did){
+    var d = dirOf(did); if (!d) return;
+    roiDir = did;
+    ['org','addr','city','state','zip','phone','fax','email'].forEach(function(k){ roiC[k] = d[k] || ''; });
+  }
+  function applyPreset(id){
+    var pr = presetOf(id);
+    roiFrom = pr; roiOpen = id; roiDir = null;
+    roiC = {}; Object.keys(pr.contact).forEach(function(k){ roiC[k] = pr.contact[k]; });
+    if (pr.dir) applyDir(pr.dir);
+    roiP = pr.purpose.slice(); roiI = pr.info.slice(); roiLimit = false;
+  }
+  function roiTitle(){
+    if (!roiFrom) return '';
+    return roiFrom.title.replace(/\{(\w+)\}/g, function(_,k){
+      return roiC[k] || '‹'+k+'›';
+    });
+  }
+  function fromPreset(kind, i){
+    if (!roiFrom) return false;
+    if (kind==='p') return roiFrom.purpose.indexOf(i) > -1;
+    if (kind==='i') return roiFrom.info.indexOf(i) > -1;
+    if (roiFrom.contact[i] !== undefined) return true;
+    if (roiDir){ var d = dirOf(roiDir);
+      return d && d[i] !== undefined && d[i] !== ''; }
+    return false;
+  }
+
+  P.rois = function(){
+    var h = head('Releases of Information', roiMenu());
+
+    if (roiOpen) {
+      h += '<section class="card" style="border-color:var(--accent)">' +
+        '<h2>New release <span class="n">from preset: '+roiFrom.name+'</span></h2>' +
+        '<div class="body">' +
+
+        '<div class="k">Document title</div>' +
+        '<div class="prose" style="font-weight:600;margin-bottom:18px" id="roititle">'+roiTitle()+'</div>' +
+
+        '<div class="k">Release To / Release Obtained From</div>' +
+        '<div style="margin-bottom:12px"><select data-rdir="1">' +
+          '<option value="">— select from recipient directory, or type below —</option>' +
+          DIRECTORY.map(function(d){
+            return '<option value="'+d.id+'"'+(roiDir===d.id?' selected':'')+'>'+d.org+
+              ' · '+d.type+' · fax '+d.fax+'</option>'; }).join('') +
+        '</select>' + (roiDir ? '<div class="sub" style="margin-top:5px">Filled from the directory — ' +
+          'edit any field below and it stays edited on this release only.</div>' : '') + '</div>' +
+        '<div class="fields" style="margin-bottom:18px">' +
+        CONTACT_FIELDS.map(function(f){
+          var pre = fromPreset('c', f[0]);
+          var src = (roiDir && dirOf(roiDir) && dirOf(roiDir)[f[0]]) ? 'directory' : 'preset';
+          return '<div class="f"><div class="k">'+f[1]+(pre?' <span class="pre">'+src+'</span>':'')+'</div>' +
+            '<input type="text" data-rc="'+f[0]+'" value="'+(roiC[f[0]]||'')+'"></div>';
+        }).join('') + '</div>' +
+
+        '<div class="k">Purpose of Disclosure</div>' +
+        '<div class="cbs" style="margin-bottom:18px">' +
+        ROI_PURPOSE.map(function(l,i){
+          var on = roiP.indexOf(i)>-1, pre = fromPreset('p',i);
+          return '<label class="cb'+(on?' on':'')+'"><input type="checkbox" data-rp="'+i+'"'+
+            (on?' checked':'')+'><span>'+l+(pre?' <span class="pre">preset</span>':'')+'</span></label>';
+        }).join('') + '</div>' +
+
+        '<div class="k">Information to be Disclosed</div>' +
+        '<div class="cbs" style="margin-bottom:18px">' +
+        ROI_INFO.map(function(l,i){
+          var on = roiI.indexOf(i)>-1, pre = fromPreset('i',i);
+          return '<label class="cb'+(on?' on':'')+'"><input type="checkbox" data-ri="'+i+'"'+
+            (on?' checked':'')+'><span>'+l+(pre?' <span class="pre">preset</span>':'')+'</span></label>';
+        }).join('') + '</div>' +
+
+        '<div class="k">Re-disclosure limit</div>' +
+        '<div class="cbs" style="margin-bottom:18px">' +
+        '<label class="cb'+(roiLimit?' on':'')+'"><input type="checkbox" data-rl="1"'+
+        (roiLimit?' checked':'')+'><span>I would like to limit or restrict the re-disclosure of my ' +
+        'SUD / PHI at this time</span></label>' +
+        (roiLimit ? '<input type="text" data-rc="limitwhat" placeholder="The information I would like to limit is…" ' +
+          'value="'+(roiC.limitwhat||'')+'" style="margin-top:8px">' : '') +
+        '</div>' +
+
+        '<div class="list" style="border:1px solid var(--line);border-radius:4px;margin-bottom:16px">' +
+          row('<b>Client, DOB, MRN, date, agency header</b>','<span class="tag info">from chart</span>') +
+          row('<b>Authorization and re-disclosure language</b>','<span class="tag mute">fixed on the form</span>') +
+          row('<b>Expires</b> — one year from signature','<span class="tag mute">fixed on the form</span>') +
+        '</div>' +
+
+        '<div class="actions">' +
+        '<a class="btn primary" href="#sign" data-roigen="1">Open &amp; sign</a>' +
+        '<a class="btn" href="#cancel" data-roicancel="1">Cancel</a></div>' +
+        '<p class="demonote">Everything a preset filled is still editable. The preset is a starting ' +
+        'point, not a lock — and which boxes it ticks is the tenant\'s decision, configured once.</p>' +
+        '</div></section>';
+    }
+
+    h += '<section class="card"><h2>On file <span class="n">'+
+      rois.filter(function(r){ return r.st==='active'; }).length+' active</span></h2>' +
+      '<div class="tw"><table><thead><tr><th>Document</th><th>Recipient</th><th>Signed</th>' +
+      '<th>Expires</th><th>Status</th></tr></thead><tbody>' +
+      rois.map(function(r){
+        return '<tr><td><b>'+r.title+'</b></td><td>'+r.to+'</td>' +
+          '<td class="mono">'+r.signed+'</td><td class="mono">'+r.exp+'</td>' +
+          '<td>'+(r.st==='active'?'<span class="tag ok">Active</span>':'<span class="tag mute">Expired</span>')+
+          '</td></tr>';
+      }).join('')+'</tbody></table></div></section>';
+
+    h += '<section class="card"><h2>How presets work</h2><div class="body">' +
+      '<p class="sub" style="margin:0 0 10px">There is <b>one</b> ROI form. A preset is a saved set ' +
+      'of default values for it — nothing more. A preset can fill the contact block, tick purpose and ' +
+      'information boxes, both, or neither.</p>' +
+      '<div class="list" style="border:1px solid var(--line);border-radius:4px">' +
+        row('<b>Contact + scope prefilled</b><br><span class="sub">A specific organization everyone ' +
+            'signs for. Open, sign, done.</span>','<span class="sub">VCU · Richmond Community</span>') +
+        row('<b>Scope prefilled, contact blank</b><br><span class="sub">The boxes are always the same; ' +
+            'the person or agency changes each time.</span>','<span class="sub">Emergency contact · Probation</span>') +
+        row('<b>Nothing prefilled</b><br><span class="sub">A blank form, always available.</span>',
+            '<span class="sub">Blank ROI</span>') +
+      '</div>' +
+      '<p class="sub" style="margin:12px 0 0">Presets are authored in Configure. What any of them ' +
+      'contains — including which boxes are ticked — is the agency\'s call, not the product\'s.</p>' +
+      '<p class="sub" style="margin:10px 0 0"><b>Recipients come from a directory.</b> A preset points ' +
+      'at a directory record rather than copying it, so when an organization\'s fax number changes it ' +
+      'changes once. Editing a field on a release changes that release only.</p>' +
+      '</div></section>';
+    return h;
+  };
+
+  function roiMenu(){
+    var groups = {};
+    ROI_PRESETS.forEach(function(p){ (groups[p.group] = groups[p.group] || []).push(p); });
+    var items = Object.keys(groups).map(function(g){
+      return '<div class="mh">'+g+'</div>' + groups[g].map(function(p){
+        return '<a href="#new" data-roipre="'+p.id+'">'+p.name+'</a>'; }).join('');
+    }).join('');
+    return '<span class="menu"><button type="button" class="plus">+ New ROI</button>' +
+           '<span class="items">'+items+'</span></span>';
+  }
+
+  function stub(t,n){ return head(t)+'<div class="stub" style="max-width:640px"><section class="card"><div class="body">'+
+    '<p style="margin:0 0 6px"><b>Not built in this study.</b></p><p class="sub" style="margin:0">'+n+'</p></div></section></div>'; }
+  P.medical   = stub('Medical / Nursing','Medical and nursing documentation. Same shape as Clinical — its own "+ New note" list, its own filters.');
+  P.peer      = stub('Peer Support','Peer recovery documentation — billable, on its own claim lines, outside PHP/IOP hour totals.');
+  P.casemgmt  = stub('Case Management','Case management contacts and coordination.');
+  P.tx        = stub('Treatment Planning','ISP, objectives, and periodic reviews — C-01 through C-07. Lives here, and also surfaces in Clinical, since sections are filters rather than folders. An ISP can be created from either place. Deserves its own study; the objective progress grid is the most novel screen in the product.');
+  P.discharge = stub('Discharge Planning','Discharge plan and continuity-of-care documentation.');
+  P.meds      = stub('Medications','Active list plus discontinued history. Depends on an e-prescribing integration.');
+  P.consents  = stub('Consents','All consent forms with expiry tracking.');
+
+  function gr(d,n,fa,at,pa,st){ return '<tr><td class="mono">'+d+'</td><td><b>'+n+'</b></td><td>'+fa+
+    '</td><td class="mono">'+at+'</td><td>'+pa+'</td><td>'+st+'</td></tr>'; }
+  function tl(d,n,di,a,st){ return '<tr><td class="mono">'+d+'</td><td><b>'+n+'</b></td><td>'+di+
+    '</td><td>'+a+'</td><td>'+st+'</td></tr>'; }
+  function day(label,hrs,tone,word,lines){
+    var body = lines.map(function(l){
+      return '<div class="dline"><div>'+l[0]+' <span class="z mono">'+l[1]+'</span></div>'+
+             '<div><span class="mono">'+l[2]+'</span> <span class="z">'+l[3]+'</span></div></div>';
+    }).join('');
+    return '<details class="day"'+(tone==='warn'?' open':'')+'><summary><div><b>'+label+'</b></div>'+
+      '<div class="r"><span class="mono">'+hrs+' hrs</span> <span class="tag '+tone+'">'+word+'</span></div></summary>'+
+      '<div class="daybody">'+body+'</div></details>';
+  }
+
+  var cur = { g:'overview', s:'face' };
+
+  function render(){
+    var grp = GROUPS[cur.g];
+    document.querySelectorAll('.groupnav a').forEach(function(a){ a.classList.toggle('on', a.dataset.g===cur.g); });
+
+    var mode = app.getAttribute('data-nav');
+    var rh = '';
+    if (mode === 'left') {
+      Object.keys(GROUPS).forEach(function(gid){
+        rh += '<div class="railhead">'+GROUPS[gid].label+'</div>';
+        GROUPS[gid].sections.forEach(function(s){ rh += link(gid,s); });
+      });
+    } else {
+      rh += '<div class="railhead">'+grp.label+'</div>';
+      grp.sections.forEach(function(s){ rh += link(cur.g,s); });
+    }
+    rail.innerHTML = rh;
+
+    if (mode === 'flat') {
+      sbar.innerHTML = allSections().map(function(e){
+        return '<a href="#g='+e.g+'&s='+e.s.id+'" data-g2="'+e.g+'" data-s="'+e.s.id+'" class="'+
+          (e.s.id===cur.s?'on':'')+'">'+e.s.name+
+          (e.s.count?'<span class="count">'+e.s.count+'</span>':'')+'</a>';
+      }).join('');
+    } else {
+      sbar.innerHTML = grp.sections.map(function(s){
+        return '<a href="#g='+cur.g+'&s='+s.id+'" data-s="'+s.id+'" class="'+(s.id===cur.s?'on':'')+'">'+
+          s.name+(s.count?'<span class="count">'+s.count+'</span>':'')+'</a>';
+      }).join('');
+    }
+
+    var pan = P[cur.s];
+    main.innerHTML = (typeof pan === 'function' ? pan() : pan) || stub(cur.s,'Not built in this study.');
+    wire();
+  }
+  function link(gid,s){
+    return '<a href="#g='+gid+'&s='+s.id+'" data-g2="'+gid+'" data-s="'+s.id+'" class="'+
+      (gid===cur.g && s.id===cur.s ? 'on':'')+'">'+s.name+
+      (s.count?'<span class="count">'+s.count+'</span>':'')+'</a>';
+  }
+  function go(gid,sid){
+    if(!GROUPS[gid]) return;
+    cur.g = gid;
+    var ids = GROUPS[gid].sections.map(function(s){ return s.id; });
+    cur.s = (sid && ids.indexOf(sid)>-1) ? sid : ids[0];
+    render();
+  }
+  function fromHash(){
+    var m = /g=([a-z]+)(?:&s=([a-z]+))?/.exec((location.hash||'').replace(/^#/,''));
+    if(m) go(m[1],m[2]); else render();
+  }
+
+  document.addEventListener('click', function(e){
+    var pre = e.target.closest('[data-roipre]');
+    if (pre){ e.preventDefault(); applyPreset(pre.dataset.roipre);
+      var om = document.querySelector('.menu.open'); if (om) om.classList.remove('open');
+      render(); return; }
+    if (e.target.closest('[data-roicancel]')){ e.preventDefault();
+      roiOpen=null; roiFrom=null; roiDir=null; roiC={}; roiP=[]; roiI=[]; roiLimit=false; render(); return; }
+    var gen = e.target.closest('[data-roigen]');
+    if (gen){ e.preventDefault();
+      var to = roiC.org || roiC.name || '—';
+      rois.unshift({ title:roiTitle(), to:to, signed:'08/24/2026', exp:'08/24/2027', st:'active' });
+      roiOpen=null; roiFrom=null; roiDir=null; roiC={}; roiP=[]; roiI=[]; roiLimit=false; render(); return; }
+
+    var a = e.target.closest('a'); if(!a) return;
+    if (a.dataset.s) { e.preventDefault(); var g = a.dataset.g2 || cur.g;
+      history.replaceState(null,'','#g='+g+'&s='+a.dataset.s); go(g, a.dataset.s); }
+    else if (a.dataset.g) { e.preventDefault();
+      history.replaceState(null,'','#g='+a.dataset.g); go(a.dataset.g); }
+  });
+
+  document.addEventListener('input', function(e){
+    var d = e.target.dataset || {};
+    if (d.rc !== undefined){
+      roiC[d.rc] = e.target.value;
+      var t = document.getElementById('roititle'); if (t) t.textContent = roiTitle();
+    }
+  });
+  document.addEventListener('change', function(e){
+    var d = e.target.dataset || {};
+    if (d.rp !== undefined){
+      var i = +d.rp, k = roiP.indexOf(i);
+      if (k>-1) roiP.splice(k,1); else roiP.push(i);
+      render(); return;
+    }
+    if (d.ri !== undefined){
+      var j = +d.ri, m = roiI.indexOf(j);
+      if (m>-1) roiI.splice(m,1); else roiI.push(j);
+      render(); return;
+    }
+    if (d.rl !== undefined){ roiLimit = !roiLimit; render(); return; }
+    if (d.rdir !== undefined){
+      if (e.target.value) applyDir(e.target.value);
+      else { roiDir = null; ['org','addr','city','state','zip','phone','fax','email']
+        .forEach(function(k){ delete roiC[k]; }); }
+      render(); return;
+    }
+  });
+
+  function wire(){
+    main.querySelectorAll('.menu .plus').forEach(function(b){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        var m = b.parentNode, was = m.classList.contains('open');
+        document.querySelectorAll('.menu').forEach(function(o){ o.classList.remove('open'); });
+        if(!was) m.classList.add('open');
+      });
+    });
+    main.querySelectorAll('.filters').forEach(function(bar, i){
+      bar.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){
+          if (i === 0) bar.querySelectorAll('button').forEach(function(o){ o.setAttribute('aria-pressed', String(o===b)); });
+          else b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true');
+        });
+      });
+    });
+  }
+
+  function seg(attr, fn){
+    document.querySelectorAll('.seg button['+attr+']').forEach(function(b){
+      b.addEventListener('click', function(){
+        fn(b);
+        document.querySelectorAll('.seg button['+attr+']').forEach(function(o){
+          o.setAttribute('aria-pressed', String(o===b));
+        });
+      });
+    });
+  }
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.menu').forEach(function(m){ m.classList.remove('open'); });
+  });
+
+  var EP = { open:'Open', discharged:'Discharged', closed:'Closed' };
+  seg('data-e', function(b){
+    var k = b.dataset.e, chip = document.getElementById('epchip');
+    chip.className = 'chip ep-' + k;
+    chip.textContent = 'Episode 2 · ' + EP[k];
+  });
+  seg('data-n', function(b){ app.setAttribute('data-nav', b.dataset.n); render(); });
+  seg('data-p', function(b){ document.documentElement.setAttribute('data-palette', b.dataset.p); });
+  seg('data-t', function(b){ document.documentElement.setAttribute('data-theme', b.dataset.t); });
+
+  document.documentElement.setAttribute('data-palette','deep-cerulean');
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>

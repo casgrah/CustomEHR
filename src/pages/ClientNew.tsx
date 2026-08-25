@@ -11,6 +11,8 @@ export default function ClientNew() {
 
   const [locs, setLocs] = useState<ValueListItem[]>([])
   const [payers, setPayers] = useState<ValueListItem[]>([])
+  const [flagList, setFlagList] = useState<ValueListItem[]>([])
+  const [flags, setFlags] = useState<string[]>([])
   const [facilities, setFacilities] = useState<Facility[]>([])
   const [staff, setStaff] = useState<Profile[]>([])
   const [err, setErr] = useState('')
@@ -42,6 +44,11 @@ export default function ClientNew() {
         .eq('list_id', byKey.payers).eq('is_active', true).order('sort_order')
       setPayers((data as ValueListItem[]) ?? [])
     }
+    if (byKey.flags) {
+      const { data } = await supabase.from('value_list_items').select('*')
+        .eq('list_id', byKey.flags).eq('is_active', true).order('sort_order')
+      setFlagList((data as ValueListItem[]) ?? [])
+    }
     const { data: fac } = await supabase.from('facilities').select('*').eq('is_active', true).order('name')
     setFacilities((fac as Facility[]) ?? [])
     if ((fac as Facility[])?.length) setEp(s => ({ ...s, facility_id: (fac as Facility[])[0].id }))
@@ -68,6 +75,7 @@ export default function ClientNew() {
         phone: f.phone.trim(),
         email: f.email.trim(),
         notes: f.notes.trim(),
+        flags,
         created_by: profile!.id,
       }).select().single()
       if (error) throw error
@@ -130,6 +138,23 @@ export default function ClientNew() {
             <Field label="Email">
               <input type="email" value={f.email} onChange={e => set('email', e.target.value)} />
             </Field>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <div style={{ fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase',
+                          color: 'var(--ink-faint)', fontWeight: 700, marginBottom: 6 }}>
+              Flags — shown on the census card and the chart header
+            </div>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+              {flagList.map(fl => (
+                <label key={fl.id} className="chk">
+                  <input type="checkbox" checked={flags.includes(fl.code)}
+                         onChange={e => setFlags(s2 => e.target.checked
+                           ? [...s2, fl.code] : s2.filter(x => x !== fl.code))} />
+                  {fl.label}
+                </label>
+              ))}
+            </div>
           </div>
         </div>
       </Card>

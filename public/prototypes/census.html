@@ -1,0 +1,2481 @@
+<meta charset="utf-8">
+<title>Census Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+
+<style>
+  :root {
+    --chrome:#0A4767; --chrome-hi:#0F6690; --chrome-ink:#DDEDF7; --chrome-dim:#94BFD9;
+    --ground:#E9EAEC; --surface:#FFFFFF; --surface-2:#F2F3F5; --surface-3:#E3E5E9;
+    --ink:#13161A; --ink-soft:#4E555E; --ink-faint:#79818B;
+    --line:#D5D8DD; --line-strong:#A9AEB6;
+    --accent:#0A6893; --accent-soft:#DCEFFA;
+    --alert:#9C2317; --alert-soft:#FBE2DF; --warn:#875204; --warn-soft:#FAEDD4;
+    --good:#1C6741; --good-soft:#DDEFE4;
+    --loc-a:#2E75C4; --loc-b:#B4479B; --loc-c:#C77A0E; --loc-d:#1F8A5F; --loc-e:#6E5AC8;
+    --shadow:0 1px 2px rgba(19,22,26,.07), 0 1px 6px rgba(19,22,26,.04);
+    --fs:14px; --fs-sm:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+      --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+      --line:#2F343A; --line-strong:#454C54;
+      --accent:#6BBEE8; --accent-soft:#12303F;
+      --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+      --good:#6FC094; --good-soft:#1B2E24;
+      --loc-a:#4E8ED4; --loc-b:#CC61AE; --loc-c:#C08828; --loc-d:#36A574; --loc-e:#8672DC;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 1px 6px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0F1113; --surface:#191C1F; --surface-2:#22262A; --surface-3:#2B3036;
+    --ink:#ECEEF1; --ink-soft:#A4ACB4; --ink-faint:#79818A;
+    --line:#2F343A; --line-strong:#454C54;
+    --accent:#6BBEE8; --accent-soft:#12303F;
+    --alert:#F08A7C; --alert-soft:#3A211D; --warn:#DFAE55; --warn-soft:#332818;
+    --good:#6FC094; --good-soft:#1B2E24;
+    --loc-a:#4E8ED4; --loc-b:#CC61AE; --loc-c:#C08828; --loc-d:#36A574; --loc-e:#8672DC;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 1px 6px rgba(0,0,0,.25);
+  }
+
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    font-size:var(--fs); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  a { color:var(--accent); text-decoration:none; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  .mono { font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .wrap { max-width:1440px; margin:0 auto; padding:0 18px; }
+  .sub { color:var(--ink-soft); font-size:var(--fs-sm); }
+
+  .app { background:var(--chrome); color:var(--chrome-ink); }
+  .app .wrap { display:flex; flex-wrap:wrap; gap:11px 18px; align-items:center; padding-top:11px; padding-bottom:11px; }
+  .brand { font-family:"Source Serif 4",Georgia,serif; font-size:19px; font-weight:700; color:#fff; letter-spacing:-.01em; }
+  :root[data-theme="dark"] .brand, :root:not([data-theme="light"]) .brand { color:var(--chrome-ink); }
+  .brand span { font-family:"IBM Plex Sans",sans-serif; font-size:11px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--chrome-dim); margin-left:9px; }
+  .app input[type=text] { font-family:inherit; font-size:13px; padding:6px 11px; border-radius:5px; width:200px;
+    border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.12); color:#fff; margin-left:auto; }
+  .app input[type=text]::placeholder { color:var(--chrome-dim); }
+  .mainnav { background:var(--chrome-hi); border-bottom:1px solid rgba(0,0,0,.28); }
+  .mainnav .wrap { display:flex; overflow-x:auto; padding:0 18px; }
+  .mainnav a { padding:11px 16px; color:var(--chrome-dim); font-size:13.5px; font-weight:600;
+    white-space:nowrap; border-bottom:3px solid transparent; }
+  .mainnav a:hover { color:var(--chrome-ink); background:rgba(255,255,255,.07); }
+  .mainnav a.on { color:#fff; border-bottom-color:#7ED0F5; background:rgba(255,255,255,.09); }
+  :root[data-theme="dark"] .mainnav a.on, :root:not([data-theme="light"]) .mainnav a.on { color:var(--chrome-ink); }
+  .mainnav .badge { display:inline-block; margin-left:7px; padding:1px 6px; border-radius:9px;
+    background:#B5760A; color:#fff; font-size:10.5px; font-weight:700; }
+
+  .tools { background:var(--surface); border-bottom:1px solid var(--line); }
+  .tools .wrap { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; padding-top:9px; padding-bottom:9px; }
+  .locfilters { display:flex; flex-wrap:wrap; gap:6px; }
+  .locbtn { display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px;
+    font-weight:500; padding:5px 12px; border-radius:20px; cursor:pointer;
+    border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); }
+  .locbtn .dot { width:9px; height:9px; border-radius:50%; flex:0 0 9px; }
+  .locbtn .ct { font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-faint); }
+  .locbtn[aria-pressed="true"] { background:var(--chrome); border-color:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+  .locbtn[aria-pressed="true"] .ct { color:var(--chrome-dim); }
+  .right { margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .seg { display:flex; border:1px solid var(--line-strong); border-radius:5px; overflow:hidden; }
+  .seg button { font-family:inherit; font-size:12.5px; background:var(--surface); color:var(--ink-soft);
+    border:0; border-right:1px solid var(--line); padding:5px 12px; cursor:pointer; }
+  .seg button:last-child { border-right:0; }
+  .seg button[aria-pressed="true"] { background:var(--chrome); color:var(--chrome-ink); font-weight:600; }
+  select { font-family:inherit; font-size:12.5px; padding:5px 9px; border-radius:5px;
+    border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+
+  .pop { position:relative; }
+  .pop .sheet { display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:30; width:250px;
+    background:var(--surface); border:1px solid var(--line-strong); border-radius:5px;
+    box-shadow:0 8px 26px rgba(0,0,0,.18); overflow:hidden; }
+  .pop.on .sheet { display:block; }
+  .pop .sheet .hd { padding:7px 12px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; background:var(--surface-2); border-bottom:1px solid var(--line); }
+  .pop .sheet label { display:flex; gap:9px; align-items:center; padding:7px 12px; font-size:12.5px;
+    border-top:1px solid var(--line); cursor:pointer; }
+  .pop .sheet label:first-of-type { border-top:0; }
+  .pop .sheet label:hover { background:var(--surface-2); }
+
+  main { padding:14px 0 40px; }
+  .count { font-size:12.5px; color:var(--ink-soft); margin-bottom:10px; }
+  .count b { color:var(--ink); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(214px, 1fr)); gap:9px; }
+  .fc { background:var(--surface); border:1px solid var(--line); border-radius:5px; box-shadow:var(--shadow);
+    display:flex; overflow:hidden; cursor:pointer; }
+  .fc:hover { border-color:var(--accent); box-shadow:0 2px 10px rgba(10,104,147,.16); }
+  .fc .stripe { width:4px; flex:0 0 4px; }
+  .fc .in { padding:8px 9px 9px; flex:1 1 auto; min-width:0; }
+  .fc .r1 { display:flex; gap:8px; align-items:center; margin-bottom:4px; }
+  .fc .av { width:32px; height:32px; border-radius:50%; flex:0 0 32px; }
+  .fc .nm { font-size:12.5px; font-weight:700; line-height:1.25; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; }
+  .locchip { display:inline-block; padding:1px 7px; border-radius:3px; font-size:9.5px; font-weight:700;
+    letter-spacing:.05em; color:#fff; white-space:nowrap; }
+  :root[data-theme="dark"] .locchip, :root:not([data-theme="light"]) .locchip { color:#0E1114; }
+  .flags { display:flex; gap:3px; flex-wrap:wrap; margin-bottom:4px; min-height:15px; }
+  .flag { font-size:9px; font-weight:700; letter-spacing:.05em; padding:1px 5px; border-radius:3px;
+    border:1px solid; white-space:nowrap; cursor:help; }
+  .flag.crit { background:var(--alert-soft); color:var(--alert); border-color:var(--alert); }
+  .flag.warn { background:var(--warn-soft); color:var(--warn); border-color:var(--warn); }
+  .flag.info { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+  .flag.mute { background:var(--surface-3); color:var(--ink-soft); border-color:var(--line-strong); }
+  .fc .meta { font-size:11px; color:var(--ink-soft); line-height:1.5; }
+  .fc .meta .row { display:flex; justify-content:space-between; gap:7px; }
+  .fc .meta .row span:last-child { color:var(--ink-faint); white-space:nowrap; }
+  .fc .meta .t { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .tw { background:var(--surface); border:1px solid var(--line); border-radius:5px; overflow-x:auto; box-shadow:var(--shadow); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint);
+    font-weight:700; padding:8px 11px; border-bottom:1px solid var(--line); background:var(--surface-2); white-space:nowrap; }
+  td { padding:7px 11px; border-top:1px solid var(--line); white-space:nowrap; }
+  tbody tr:hover { background:var(--surface-2); cursor:pointer; }
+  td .nm { font-weight:600; }
+
+  .tag { display:inline-block; padding:1px 7px; border-radius:3px; font-size:10px; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase; }
+  .tag.ok { background:var(--good-soft); color:var(--good); }
+  .tag.warn { background:var(--warn-soft); color:var(--warn); }
+  .tag.bad { background:var(--alert-soft); color:var(--alert); }
+  .tag.mute { background:var(--surface-3); color:var(--ink-soft); }
+  .tag.info { background:var(--accent-soft); color:var(--accent); }
+
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:5px; box-shadow:var(--shadow);
+    overflow:hidden; margin-bottom:14px; }
+  .card > h2 { margin:0; padding:11px 16px; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-soft); border-bottom:1px solid var(--line); background:var(--surface-2);
+    display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; }
+  .card .body { padding:16px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:10px; margin-bottom:14px; }
+  .kpi { background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:12px 14px; box-shadow:var(--shadow); }
+  .kpi .l { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; }
+  .kpi .v { font-family:"IBM Plex Mono",monospace; font-size:24px; font-weight:600; line-height:1.2; margin-top:3px; }
+  .kpi .d { font-size:11.5px; color:var(--ink-soft); }
+  .kpi.warn .v { color:var(--warn); } .kpi.bad .v { color:var(--alert); } .kpi.good .v { color:var(--good); }
+
+  .stub { padding:40px 20px; text-align:center; color:var(--ink-soft); }
+  .stub b { color:var(--ink); display:block; margin-bottom:5px; font-size:15px; }
+  .stublist { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:9px; margin-top:18px; text-align:left; }
+  .stublist div { border:1px dashed var(--line-strong); border-radius:5px; padding:11px 13px; font-size:12.5px; }
+  .stublist b { font-size:13px; margin-bottom:2px; }
+
+  /* ---- schedule grid ---- */
+  table.sched td { white-space:normal; vertical-align:top; min-width:132px; padding:6px 7px; }
+  .slotcell { min-width:96px; background:var(--surface-2); font-size:11.5px; line-height:1.35; }
+  .satcol { background:var(--surface-2); }
+  .gline { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .gline.bad { outline:2px solid var(--alert); outline-offset:1px; border-radius:4px; }
+  .gtag { font-size:9px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    padding:2px 5px; border-radius:3px; background:var(--surface-3); color:var(--ink-soft);
+    flex:0 0 auto; min-width:52px; text-align:center; }
+  .gtag.comb { background:var(--accent); color:#fff; min-width:66px; }
+  :root[data-theme="dark"] .gtag.comb, :root:not([data-theme="light"]) .gtag.comb { color:#06222F; }
+  .facpill { display:inline-block; font-family:inherit; font-size:12px; font-weight:700;
+    padding:3px 9px; border-radius:4px; border:0; cursor:pointer; flex:1 1 auto; text-align:left; }
+  button.facpill:hover { filter:brightness(.94); }
+  .gline.dim { opacity:.28; }
+  .modchip { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; background:var(--accent-soft); color:var(--accent);
+    border-radius:3px; padding:1px 6px; margin:0 0 3px 58px; }
+  .rolebtn { font-family:inherit; font-size:9.5px; padding:1px 6px; border-radius:3px; cursor:pointer;
+    background:none; border:1px dashed var(--line-strong); color:var(--ink-faint); margin:0 0 4px 58px; }
+  .rolebtn:hover { border-color:var(--accent); color:var(--accent); }
+  .rolepanel { border:1px solid var(--accent); border-radius:4px; padding:7px 8px; margin:2px 0 5px 0;
+    background:var(--surface-2); }
+  .rolepanel .rl { display:flex; flex-direction:column; gap:2px; margin-bottom:5px; }
+  .rolepanel .rl span { font-size:9px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; }
+  .rolepanel select { font-size:11px; padding:3px 5px; width:100%; }
+  .noteinput { font-family:inherit; font-size:11px; padding:4px 7px; width:100%;
+    border:1px solid var(--accent); border-radius:3px; background:var(--surface); color:var(--ink); }
+  .rolenote { font-size:10.5px; color:var(--ink-soft); margin:0 0 4px 58px; line-height:1.35; }
+  /* ---- authorization board ---- */
+  .authtbl td { vertical-align:top; }
+  .dtiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:8px;
+    margin-bottom:14px; }
+  .dtile { background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    padding:9px 11px; box-shadow:var(--shadow); }
+  .dtile[data-jump] { cursor:pointer; }
+  .dtile[data-jump]:hover { border-color:var(--accent); }
+  .dtile .v { font-size:19px; font-weight:600; line-height:1.15; }
+  .dtile .l { font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; margin-top:2px; }
+  .dtile.warn .v { color:var(--warn); } .dtile.bad .v { color:var(--alert); }
+  .dtile.cen { background:var(--surface-2); }
+  .stchip { display:inline-block; padding:1px 7px; border-radius:3px; font-size:10.5px;
+    font-weight:600; cursor:pointer; white-space:nowrap; border:1px solid transparent; }
+  .stchip b { font-weight:700; margin-right:2px; }
+  .stchip:hover { border-color:currentColor; }
+  .stchip.ok { background:var(--good-soft); color:var(--good); }
+  .stchip.warn { background:var(--warn-soft); color:var(--warn); }
+  .stchip.bad { background:var(--alert-soft); color:var(--alert); }
+  .stchip.info { background:var(--accent-soft); color:var(--accent); }
+  .stchip.mute { background:var(--surface-3); color:var(--ink-soft); }
+  tr.lt-uncov { background:color-mix(in srgb, var(--alert) 12%, transparent); }
+  tr.lt-warn  { background:color-mix(in srgb, var(--warn) 9%, transparent); }
+  .dtile .s { font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
+  .stchip { cursor:default; }
+  .tline { position:relative; height:74px; background:var(--surface-3); border-radius:4px;
+    margin-bottom:10px; }
+  .tseg { position:absolute; top:8px; height:24px; border-radius:3px; font-size:10.5px;
+    font-weight:700; line-height:24px; padding:0 6px; overflow:hidden; white-space:nowrap; }
+  .tseg.ok   { background:var(--good-soft);  color:var(--good);  border:1px solid var(--good); }
+  .tseg.pend { background:var(--warn-soft);  color:var(--warn);  border:1px dashed var(--warn); }
+  .tseg.no   { background:var(--alert-soft); color:var(--alert); border:1px solid var(--alert); }
+  .tgap { position:absolute; top:36px; height:11px; border-radius:2px; overflow:hidden;
+    background:repeating-linear-gradient(45deg, color-mix(in srgb,var(--alert) 45%, transparent) 0 4px,
+      transparent 4px 8px); border:1px solid var(--alert); font-size:0; }
+  .tday { position:absolute; bottom:7px; width:3px; height:11px; border-radius:1px;
+    background:var(--ink-faint); }
+  .tday.bad { background:var(--alert); height:16px; }
+  .tnow { position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--ink); }
+  .tnow span { position:absolute; top:-15px; left:-15px; font-size:9px; font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
+  .tkey { display:flex; gap:14px; flex-wrap:wrap; font-size:10.5px; color:var(--ink-soft); }
+  .tkey span { display:inline-flex; align-items:center; gap:5px; }
+  .tkey i { width:12px; height:10px; border-radius:2px; display:inline-block; }
+  .tkey i.ok   { background:var(--good-soft);  border:1px solid var(--good); }
+  .tkey i.pend { background:var(--warn-soft);  border:1px dashed var(--warn); }
+  .tkey i.no   { background:var(--alert-soft); border:1px solid var(--alert); }
+  .tkey i.gap  { background:repeating-linear-gradient(45deg,
+      color-mix(in srgb,var(--alert) 22%, transparent) 0 4px, transparent 4px 8px);
+      border:1px solid var(--alert); }
+  .tkey i.day  { width:3px; height:11px; background:var(--ink-faint); }
+  .tkey i.dayb { width:3px; height:14px; background:var(--alert); }
+  .cov { display:flex; gap:2px; height:52px; }
+  .covseg { flex:0 0 auto; border-radius:3px; padding:7px 9px; font-size:11px; font-weight:600;
+    line-height:1.3; overflow:hidden; }
+  .covseg.ok   { background:var(--good-soft);  color:var(--good); }
+  .covseg.no   { background:var(--alert-soft); color:var(--alert); }
+  .covseg.pend { background:var(--surface-3);  color:var(--ink-soft); }
+  .p2pbox { font-family:inherit; font-size:13px; padding:8px 10px; width:100%; min-height:74px;
+    border:1px solid var(--line-strong); border-radius:4px; background:var(--surface);
+    color:var(--ink); resize:vertical; }
+  .p2pbox:focus { outline:none; border-color:var(--accent); }
+  .meter { position:relative; height:7px; border-radius:4px; background:var(--surface-3);
+    overflow:visible; margin:2px 0 3px; min-width:130px; }
+  .meter .mbar { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+  .meter .mbar.ok  { background:var(--good); }
+  .meter .mbar.warn{ background:var(--warn); }
+  .meter .mbar.bad { background:var(--alert); }
+  .meter .mnow { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink);
+    opacity:.55; transform:translateX(-1px); }
+  .meter .mproj { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--alert);
+    transform:translateX(-1px); }
+  .meter .mproj::after { content:""; position:absolute; top:-3px; left:-2px; width:6px; height:6px;
+    border-radius:50%; background:var(--alert); }
+  .msub { font-size:10.5px; color:var(--ink-soft); white-space:nowrap; }
+  .rulechip { display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:9.5px;
+    line-height:1.6; padding:0 5px; border-radius:3px; border:1px solid var(--line-strong);
+    background:var(--surface-2); color:var(--ink-faint); cursor:pointer; vertical-align:middle;
+    white-space:nowrap; }
+  .rulechip:hover { border-color:var(--accent); color:var(--accent); border-style:solid; }
+  .rulechip.warn { border-color:var(--warn); color:var(--warn); }
+  .flagrow { display:grid; grid-template-columns:232px 1fr; gap:14px; padding:10px 16px;
+    border-bottom:1px solid var(--line); align-items:start; }
+  .flagrow:last-child { border-bottom:0; }
+  .flagrow.bad { background:var(--alert-soft); }
+  .flagrow.warn { background:var(--warn-soft); }
+  .authgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px 22px; }
+  .authgrid .k { font-size:9px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; margin-bottom:3px; }
+  .authgrid .big { font-size:15px; font-weight:600; }
+  .authgrid select { font-size:11.5px; padding:3px 5px; width:100%; }
+  .chainlink { display:inline-block; font-size:11px; padding:2px 7px; border-radius:3px;
+    background:var(--surface-3); color:var(--ink-soft); }
+  .chainlink.cur { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+  .chainarrow { color:var(--ink-faint); margin:0 5px; }
+  .rulemodal { position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex;
+    align-items:center; justify-content:center; padding:24px; z-index:50; }
+  .rulebox { background:var(--surface); border:1px solid var(--line-strong); border-radius:6px;
+    max-width:560px; box-shadow:0 12px 40px rgba(0,0,0,.28); }
+  .rulebox .rh { display:flex; gap:9px; align-items:center; padding:11px 16px;
+    border-bottom:1px solid var(--line); }
+  .rulebox .rh b { font-family:"IBM Plex Mono",monospace; font-size:12px; }
+  .rulebox .rh .combtog { margin-left:auto; }
+  .rulebox .rb { padding:16px; }
+  .rulebox .rb p { margin:6px 0 12px; font-size:13px; line-height:1.5; }
+  .dfields { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px 16px; }
+  .df { display:flex; flex-direction:column; gap:3px; }
+  .df .k { font-size:9px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; }
+  .df input { font-family:inherit; font-size:12.5px; padding:6px 8px; width:100%;
+    border:1px solid var(--line-strong); border-radius:3px; background:var(--surface); color:var(--ink); }
+  .df input:focus { outline:none; border-color:var(--accent); }
+  .rolebtn.dbtn { font-size:11px; padding:4px 10px; margin:0; }
+  .facpill .x { margin-left:6px; opacity:.55; font-weight:800; cursor:pointer; }
+  .facpill .x:hover { opacity:1; }
+  .combtog { font-family:inherit; font-size:10px; padding:1px 6px; border-radius:3px; cursor:pointer;
+    background:none; border:1px dashed var(--line-strong); color:var(--ink-faint); margin-top:2px; }
+  .combtog:hover { border-color:var(--accent); color:var(--accent); }
+  .asamrow td, .noterow td, .otherrow td { background:var(--surface-2); }
+  .asamrow .facpill { cursor:default; }
+  .daynote { display:inline-block; font-size:11px; background:var(--warn-soft); color:var(--warn);
+    border-radius:3px; padding:2px 7px; font-weight:500; }
+  .spec { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+    background:var(--accent-soft); color:var(--accent); border-radius:3px; padding:2px 6px; margin-bottom:4px; display:inline-block; }
+  .oth { font-size:11px; border-left:3px solid var(--line-strong); padding:3px 7px; margin-bottom:4px;
+    background:var(--surface); border-radius:0 3px 3px 0; line-height:1.35; }
+  .oth.individual { border-left-color:var(--loc-a); }
+  .oth.nursing    { border-left-color:var(--loc-d); }
+  .oth.medical    { border-left-color:var(--loc-b); }
+  .oth.staff      { border-left-color:var(--ink-faint); }
+  .oth.casemgmt   { border-left-color:var(--loc-c); }
+
+  .facmenu { position:absolute; z-index:40; margin-top:3px; width:210px; background:var(--surface);
+    border:1px solid var(--line-strong); border-radius:5px; box-shadow:0 8px 26px rgba(0,0,0,.2); overflow:hidden; }
+  .facmenu .hd { padding:6px 11px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:700; background:var(--surface-2); border-bottom:1px solid var(--line); }
+  .facmenu button { display:block; width:100%; text-align:left; font-family:inherit; font-size:12px;
+    padding:7px 11px; background:var(--surface); border:0; border-top:1px solid var(--line);
+    cursor:pointer; color:var(--ink); }
+  .facmenu button:first-of-type { border-top:0; }
+  .facmenu button:hover { background:var(--accent-soft); }
+  .facmenu button.cur { font-weight:700; background:var(--surface-2); }
+  td { position:relative; }
+
+  .demonote { font-size:var(--fs-sm); color:var(--ink-faint); font-style:italic; margin:0; }
+  .demonote::before { content:"demo note — "; font-style:normal; font-weight:700; letter-spacing:.05em;
+    font-size:10px; text-transform:uppercase; }
+
+  footer { padding:20px 0 40px; color:var(--ink-faint); font-size:12px; border-top:1px solid var(--line); background:var(--surface-2); }
+  footer p { margin:0 0 6px; max-width:86ch; } footer b { color:var(--ink-soft); }
+</style>
+
+<div class="app">
+  <div class="wrap">
+    <div class="brand">Alder Creek Recovery <span>Cardinal Care</span></div>
+    <input type="text" id="q" placeholder="Search name or MRN…">
+    <div class="me" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--chrome-dim)">
+      Signed in as <b style="color:var(--chrome-ink);font-weight:600">D. Reyes, CSAC</b>
+    </div>
+  </div>
+</div>
+
+<nav class="mainnav">
+  <div class="wrap" id="mainnav">
+    <a href="#v=census" data-v="census" class="on">Census</a>
+    <a href="#v=groups" data-v="groups">Group Sessions <span class="badge" id="grpbadge">0</span></a>
+    <a href="#v=schedule" data-v="schedule">Schedule <span class="badge" id="schbadge">0</span></a>
+    <a href="#v=check" data-v="check">Chart Check <span class="badge" id="checkbadge">0</span></a>
+    <a href="#v=discharged" data-v="discharged">Recently Discharged <span class="badge" id="dcbadge">0</span></a>
+    <a href="#v=auth" data-v="auth">Authorizations <span class="badge" id="authbadge">0</span></a>
+    <a href="#v=financial" data-v="financial">Financials</a>
+    <a href="#v=reports" data-v="reports">Reports</a>
+    <a href="#v=config" data-v="config">Configure</a>
+  </div>
+</nav>
+
+<div class="tools" id="tools">
+  <div class="wrap">
+    <div class="locfilters" id="locfilters"></div>
+    <div class="right">
+      <div class="seg" role="group" aria-label="Caseload scope">
+        <button type="button" data-scope="all" aria-pressed="true">All census</button>
+        <button type="button" data-scope="mine" aria-pressed="false">My caseload</button>
+      </div>
+      <div class="pop" id="colpop">
+        <button class="seg" style="border:0"><span style="border:1px solid var(--line-strong);
+          border-radius:5px; padding:5px 12px; font-size:12.5px; cursor:pointer;" id="colbtn">Columns</span></button>
+        <div class="sheet" id="colsheet"></div>
+      </div>
+      <div class="seg" role="group" aria-label="Layout">
+        <button type="button" data-l="cards" aria-pressed="true">Cards</button>
+        <button type="button" data-l="table" aria-pressed="false">Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="count" id="count"></div>
+  <div id="view"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>Throwaway prototype.</b> Fictional clients and a fictional agency, generated data.</p>
+    <p><b>Try:</b> switch Counselor / QA in the header · filter by level · Cards vs Table · open the
+      Columns picker · Chart Check · Recently Discharged.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var seed = 20260819;
+  function rnd(){ seed = (seed*1103515245 + 12345) % 2147483648; return seed/2147483648; }
+  function pick(a){ return a[Math.floor(rnd()*a.length)]; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  var LOCS = [
+    { id:'php', label:'PHP 2.5', full:'Partial Hospitalization', v:'--loc-a' },
+    { id:'iop', label:'IOP 2.1', full:'Intensive Outpatient',    v:'--loc-b' },
+    { id:'r35', label:'RES 3.5', full:'Clinically Managed High Intensity', v:'--loc-c' },
+    { id:'r31', label:'RES 3.1', full:'Clinically Managed Low Intensity',  v:'--loc-d' },
+    { id:'op',  label:'OP 1.0',  full:'Outpatient',              v:'--loc-e' }
+  ];
+  var LAST=['Whitfield','Alvarez','Petrov','Nguyen','Carter','Okafor','Bell','Marchetti','Duong',
+    'Rasmussen','Ferreira','Coleman','Vasquez','Brennan','Osei','Lindqvist','Haddad','Moreau','Kaur',
+    'Ivanov','Delgado','Fitzgerald','Nakamura','Boateng','Serrano','Kowalski','Mbeki','Sorensen',
+    'Castellanos','Yilmaz','Novak','Adeyemi','Petersen','Guzman','Larkin','Thibodeaux','Achebe','Kirby'];
+  var FIRST=['Marcus','Rosa','Yuri','Thao','Denise','James','Trina','Sofia','Kevin','Erik','Camila',
+    'Andre','Luz','Sean','Kwame','Elin','Nadia','Julien','Simran','Dmitri','Paola','Colleen','Hana',
+    'Kofi','Miguel','Ewa','Thabo','Ingrid','Alma','Deniz','Petra','Femi','Lars','Rosalia','Brendan',
+    'Odette','Chidi','Maeve'];
+  var COUNS=['Reyes, CSAC','Brody, LCSW','Iyer, CSAC-A','Vance, LPC','Okonkwo, LCSW','Tran, CSAC','Delaney, LPC'];
+  var PEERS=['Hollis, CPRS','Bright, CPRS','Salas, CPRS'];
+  var CMS=['Iyer','Whitmore','Ferrand','Osgood'];
+  var PAYERS=['Anthem HealthKeepers','Aetna Better Health','Humana Healthy Horizons',
+    'Sentara Community Plan','UnitedHealthcare','Cardinal Care FFS'];
+  var HUES=['#3D6E8C','#7A5C86','#2F6B5B','#8A5B3A','#4A5A8C','#7C4B57','#5B6E4A','#6B4A6E'];
+
+  /* client flags — clinical facts you need before you open the chart */
+  var FLAGS = [
+    { c:'ALG',  l:'Allergies — penicillin, sulfa',            t:'crit' },
+    { c:'SAFE', l:'Safety plan on file — review before session', t:'crit' },
+    { c:'ELOP', l:'Elopement risk',                            t:'crit' },
+    { c:'PREC', l:'Fall precautions',                          t:'warn' },
+    { c:'MOUD', l:'Medication for opioid use disorder',        t:'info' },
+    { c:'INT',  l:'Interpreter required — Spanish',            t:'info' },
+    { c:'LEG',  l:'Court-involved — probation reporting',      t:'warn' },
+    { c:'DNB',  l:'Active do-not-bill on this chart',          t:'mute' }
+  ];
+
+  /* chart check is DOCUMENTATION only — not billing */
+  var DOCTYPES = [
+    { t:'Comprehensive ISP',        w:'admit+14' },
+    { t:'30-day ISP review',        w:'cycle'    },
+    { t:'Biopsychosocial (BPS)',    w:'admit+7'  },
+    { t:'ASAM multidimensional',    w:'admit+3'  },
+    { t:'Discharge plan',           w:'ongoing'  },
+    { t:'Unsigned group note',      w:'1 bus day'},
+    { t:'Unsigned individual note', w:'1 bus day'},
+    { t:'Treatment plan signature — client', w:'admit+14' }
+  ];
+  var DOCSTATUS = [
+    { s:'missing',  label:'Missing',  tone:'bad'  },
+    { s:'past',     label:'Past due', tone:'bad'  },
+    { s:'today',    label:'Due today',tone:'warn' },
+    { s:'soon',     label:'Due soon', tone:'info' }
+  ];
+
+  function mkClient(i){
+    var loc = LOCS[Math.floor(rnd()*LOCS.length)];
+    var los = 2 + Math.floor(rnd()*74);
+    var am = Math.max(1, 8 - Math.floor(los/30)), ad = 1 + Math.floor(rnd()*27);
+    var yr = 1968 + Math.floor(rnd()*38), mo = 1+Math.floor(rnd()*12), dy = 1+Math.floor(rnd()*28);
+    var nf = rnd()<.55 ? 1+Math.floor(rnd()*2) : 0;
+    var flags = [];
+    for (var f=0; f<nf; f++){ var fl = FLAGS[Math.floor(rnd()*FLAGS.length)];
+      if (!flags.some(function(x){return x.c===fl.c;})) flags.push(fl); }
+    var nd = rnd()<.40 ? 1+Math.floor(rnd()*2) : 0;
+    var docs = [];
+    for (var d=0; d<nd; d++){
+      var dt = DOCTYPES[Math.floor(rnd()*DOCTYPES.length)];
+      var st = DOCSTATUS[Math.floor(rnd()*DOCSTATUS.length)];
+      if (!docs.some(function(x){return x.t===dt.t;}))
+        docs.push({ t:dt.t, w:dt.w, s:st.s, label:st.label, tone:st.tone,
+          due: pad(8)+'/'+pad(10+Math.floor(rnd()*18))+'/26' });
+    }
+    return {
+      id:'c'+i, first:FIRST[i%FIRST.length], last:LAST[i%LAST.length],
+      mrn:'00'+(4600+Math.floor(rnd()*900)),
+      dob:pad(mo)+'/'+pad(dy)+'/'+String(yr).slice(2), age:2026-yr,
+      loc:loc, couns:pick(COUNS), peer:pick(PEERS), cm:pick(CMS), payer:pick(PAYERS),
+      admit:pad(am)+'/'+pad(ad)+'/2026', los:los,
+      projDC:pad(8+Math.floor(rnd()*2))+'/'+pad(1+Math.floor(rnd()*27))+'/2026',
+      authDue:pad(8+Math.floor(rnd()*2))+'/'+pad(1+Math.floor(rnd()*27))+'/2026',
+      hue:HUES[i%HUES.length], flags:flags, docs:docs, dc:null,
+      track: rnd()<.18 ? 'PHP+' : rnd()<.08 ? 'Step-down' : rnd()<.10 ? 'Work/school' : 'Standard'
+    };
+  }
+
+  var clients = [];
+  for (var i=0;i<38;i++) clients.push(mkClient(i));
+
+  var discharged = [];
+  for (var d=0; d<9; d++){
+    var c = clients.pop();
+    c.dc = '08/'+pad(2+Math.floor(rnd()*17))+'/2026';
+    c.dcTime = pad(9+Math.floor(rnd()*8))+':'+pick(['00','15','30','45']);
+    c.dcReason = pick(['Completed treatment','Stepped down to IOP','Stepped down to OP',
+      'Left against advice','Administrative discharge','Transferred — higher level']);
+    discharged.push(c);
+  }
+
+  var ME = 'Reyes, CSAC';
+  function name(c){ return c.last+', '+c.first; }
+  function chartClean(c){ return c.docs.length===0; }
+
+  function avatar(c){
+    var ini = c.first.charAt(0)+c.last.charAt(0);
+    return '<svg class="av" viewBox="0 0 32 32" role="img" aria-label="'+name(c)+'">' +
+      '<rect width="32" height="32" fill="'+c.hue+'"/>' +
+      '<circle cx="16" cy="12.4" r="5.4" fill="rgba(255,255,255,.9)"/>' +
+      '<path d="M4 32c0-6.4 5.2-10 12-10s12 3.6 12 10z" fill="rgba(255,255,255,.9)"/>' +
+      '<text x="16" y="19.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" ' +
+      'font-size="10.5" font-weight="700" fill="'+c.hue+'">'+ini+'</text></svg>';
+  }
+
+  var COLS = [
+    { k:'mrn',    l:'MRN',            on:true },
+    { k:'dob',    l:'DOB',            on:true },
+    { k:'loc',    l:'Level of care',  on:true },
+    { k:'couns',  l:'Counselor',      on:true },
+    { k:'peer',   l:'Peer specialist',on:false },
+    { k:'cm',     l:'Case manager',   on:false },
+    { k:'payer',  l:'Insurance',      on:true },
+    { k:'admit',  l:'Admitted',       on:true },
+    { k:'los',    l:'LOS',            on:true },
+    { k:'track',  l:'Track',          on:false },
+    { k:'projDC', l:'Projected D/C',  on:false },
+    { k:'authDue',l:'Next auth review',on:false },
+    { k:'flags',  l:'Flags',          on:false }
+  ];
+
+  var state = { view:'census', loc:'all', layout:'cards', q:'', scope:'all', gsub:'today', week:0, sview:'groups', prog:'php', facFilter:'all', editRole:null, editNote:null, list:null, addTo:null, usage:null, dir:null, drec:null, duse:null, asub:'act', aFac:'all', aProg:'all', aOwner:'all', aCols:'lean', aq:'', aRec:null, aRule:null, aStat:null, aJump:null };
+
+  function pool(){ return state.view==='discharged' ? discharged : clients; }
+  function scoped(list){
+    return state.scope==='mine' ? list.filter(function(c){ return c.couns===ME; }) : list;
+  }
+  function filtered(){
+    return scoped(pool()).filter(function(c){
+      if (state.loc!=='all' && c.loc.id!==state.loc) return false;
+      if (state.q){ var s=(name(c)+' '+c.mrn).toLowerCase(); if (s.indexOf(state.q.toLowerCase())<0) return false; }
+      return true;
+    });
+  }
+
+  function locFilters(){
+    var p = scoped(pool());
+    var h = '<button class="locbtn" type="button" data-loc="all" aria-pressed="'+(state.loc==='all')+
+      '">All levels <span class="ct">'+p.length+'</span></button>';
+    LOCS.forEach(function(L){
+      var n = p.filter(function(c){ return c.loc.id===L.id; }).length;
+      h += '<button class="locbtn" type="button" data-loc="'+L.id+'" aria-pressed="'+(state.loc===L.id)+
+        '" title="'+L.full+'"><span class="dot" style="background:var('+L.v+')"></span>'+L.label+
+        ' <span class="ct">'+n+'</span></button>';
+    });
+    document.getElementById('locfilters').innerHTML = h;
+  }
+
+  function flagRow(c){
+    if (!c.flags.length) return '<div class="flags"></div>';
+    return '<div class="flags">'+c.flags.map(function(f){
+      return '<span class="flag '+f.t+'" title="'+f.l+'">'+f.c+'</span>'; }).join('')+'</div>';
+  }
+
+  function cards(rows){
+    return '<div class="grid">'+rows.map(function(c){
+      return '<article class="fc" data-go="'+c.id+'">' +
+        '<div class="stripe" style="background:var('+c.loc.v+')"></div><div class="in">' +
+        '<div class="r1">'+avatar(c)+'<span class="nm">'+name(c)+'</span></div>' +
+        flagRow(c) +
+        '<div style="margin-bottom:4px;"><span class="locchip" style="background:var('+c.loc.v+')">'+
+          c.loc.label+'</span> <span class="sub mono" style="font-size:10.5px">'+c.mrn+'</span></div>' +
+        '<div class="meta">' +
+          '<div class="row"><span class="mono">'+c.dob+' ('+c.age+')</span><span>'+
+            (c.dc ? 'DC '+c.dc.slice(0,5) : 'Day '+c.los)+'</span></div>' +
+          '<div class="row"><span class="t">'+c.couns+'</span></div>' +
+          '<div class="row"><span class="t">'+c.payer+'</span></div>' +
+        '</div></div></article>';
+    }).join('')+'</div>';
+  }
+
+  function cell(c,k){
+    if (k==='loc') return '<span class="locchip" style="background:var('+c.loc.v+')">'+c.loc.label+'</span>';
+    if (k==='los') return '<span class="mono">'+c.los+' d</span>';
+    if (k==='flags') return c.flags.length
+      ? c.flags.map(function(f){ return '<span class="flag '+f.t+'" title="'+f.l+'">'+f.c+'</span>'; }).join(' ')
+      : '<span class="sub">—</span>';
+    if (k==='mrn'||k==='dob'||k==='admit'||k==='projDC'||k==='authDue')
+      return '<span class="mono">'+c[k]+'</span>';
+    return c[k];
+  }
+
+  function table(rows){
+    var on = COLS.filter(function(x){ return x.on; });
+    var dc = state.view==='discharged';
+    return '<div class="tw"><table><thead><tr><th>Client</th>' +
+      on.map(function(x){ return '<th>'+x.l+'</th>'; }).join('') +
+      (dc ? '<th>Discharged</th><th>Reason</th><th>Chart</th>' : '') +
+      '</tr></thead><tbody>' +
+      rows.map(function(c){
+        return '<tr data-go="'+c.id+'"><td class="nm">'+name(c)+'</td>' +
+          on.map(function(x){ return '<td>'+cell(c,x.k)+'</td>'; }).join('') +
+          (dc ? '<td class="mono">'+c.dc+' '+c.dcTime+'</td><td class="sub">'+c.dcReason+'</td>' +
+                '<td>'+(chartClean(c) ? '<span class="tag ok">Clear</span>'
+                                      : '<span class="tag bad">'+c.docs.length+' open</span>')+'</td>' : '') +
+          '</tr>';
+      }).join('')+'</tbody></table></div>';
+  }
+
+  function colSheet(){
+    document.getElementById('colsheet').innerHTML =
+      '<div class="hd">Columns</div>' + COLS.map(function(x,i){
+        return '<label><input type="checkbox" data-col="'+i+'"'+(x.on?' checked':'')+'>'+x.l+'</label>';
+      }).join('');
+  }
+
+  /* ---------- group sessions ---------- */
+  var GTEMPLATES = [
+    { n:'Relapse Prevention',   cur:'Relapse Prevention — 12 sessions', svc:'PHP · S0201', bill:true,  min:90, cap:12 },
+    { n:'Early Recovery Skills',cur:'Early Recovery — 8 sessions',      svc:'PHP · S0201', bill:true,  min:90, cap:12 },
+    { n:'Process Group',        cur:'Open process — no curriculum',     svc:'PHP · S0201', bill:true,  min:60, cap:10 },
+    { n:'Women\'s Process',     cur:'Open process — no curriculum',     svc:'PHP · S0201', bill:true,  min:60, cap:10 },
+    { n:'Health Literacy',      cur:'Health &amp; Wellness — 6 sessions',   svc:'PHP · S0201', bill:true,  min:60, cap:14 },
+    { n:'Family Education',     cur:'Family Program — 4 sessions',      svc:'PHP · S0201', bill:true,  min:90, cap:16 },
+    { n:'Peer Support Circle',  cur:'Peer-led, no curriculum',          svc:'Peer · H0038',bill:true,  min:30, cap:14,
+      note:'Billable separately — does not count toward PHP hours' },
+    { n:'Treatment Team',       cur:'Staff meeting',                    svc:'Non-billable',bill:false, min:60, cap:0,
+      note:'No service hours, no charge, excluded from overlap detection' }
+  ];
+
+  var SESSIONS = [
+    { t:'09:00', e:'10:30', track:'Group 1', n:'Relapse Prevention',    fac:'Reyes, CSAC',   room:'B-2', roster:9,  status:'draft'   },
+    { t:'09:00', e:'10:30', track:'Group 2', n:'Early Recovery Skills', fac:'Tran, CSAC',    room:'B-4', roster:7,  status:'signed'  },
+    { t:'11:00', e:'12:00', track:'',        n:'Health Literacy',       fac:'Reyes, CSAC',   room:'B-2', roster:14, status:'open'    },
+    { t:'13:00', e:'14:00', track:'Group 1', n:'Process Group',         fac:'Brody, LCSW',   room:'B-2', roster:8,  status:'none'    },
+    { t:'13:00', e:'14:00', track:'Group 2', n:'Women\'s Process',      fac:'Delaney, LPC',  room:'B-6', roster:6,  status:'none'    },
+    { t:'14:30', e:'15:00', track:'',        n:'Peer Support Circle',   fac:'Hollis, CPRS',  room:'Lounge', roster:11, status:'none' },
+    { t:'15:00', e:'16:00', track:'',        n:'Treatment Team',        fac:'Brody, LCSW',   room:'Conf', roster:5, status:'none'    }
+  ];
+  var SSTAT = {
+    signed:{ l:'Signed',      t:'ok'   },
+    draft: { l:'Draft — unsigned', t:'warn' },
+    open:  { l:'In progress', t:'info' },
+    none:  { l:'Not started', t:'mute' }
+  };
+  var DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+
+  function fmt12(t){ var p=t.split(':'), h=+p[0], ap=h>=12?'PM':'AM'; return (h%12||12)+':'+p[1]+' '+ap; }
+
+  function groupsView(){
+    var sub = '<div class="card"><h2>Group sessions' +
+      '<div class="seg"><button type="button" data-gsub="today" aria-pressed="'+(state.gsub==='today')+
+      '">Today</button><button type="button" data-gsub="week" aria-pressed="'+(state.gsub==='week')+
+      '">Weekly schedule</button><button type="button" data-gsub="tpl" aria-pressed="'+(state.gsub==='tpl')+
+      '">Group setup</button></div></h2>';
+
+    if (state.gsub==='today') {
+      var unsigned = SESSIONS.filter(function(s){ return s.status!=='signed'; }).length;
+      return '<div class="kpis">' +
+        kpi('Sessions today', SESSIONS.length, 'across 5 rooms','') +
+        kpi('Notes outstanding', unsigned, 'not started, open, or unsigned', unsigned?'warn':'good') +
+        kpi('Clients in group', SESSIONS.filter(function(s){return s.n!=='Treatment Team';})
+              .reduce(function(a,s){ return a+s.roster; },0), 'seat count, not unique clients','') +
+        kpi('Yours', SESSIONS.filter(function(s){ return s.fac===ME; }).length, 'facilitated by you','') +
+        '</div>' + sub +
+        '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+        '<th>Time</th><th>Track</th><th>Group</th><th>Facilitator</th><th>Room</th><th>Roster</th>' +
+        '<th>Service</th><th>Note</th><th></th></tr></thead><tbody>' +
+        SESSIONS.map(function(s){
+          var tpl = GTEMPLATES.filter(function(t){ return t.n===s.n; })[0] || {};
+          var st = SSTAT[s.status];
+          return '<tr data-session="'+s.n+'"><td class="mono">'+fmt12(s.t)+'–'+fmt12(s.e)+'</td>' +
+            '<td>'+(s.track ? '<span class="tag info">'+s.track+'</span>' : '<span class="sub">—</span>')+'</td>' +
+            '<td class="nm">'+s.n+'</td><td>'+s.fac+'</td><td>'+s.room+'</td>' +
+            '<td class="mono">'+(tpl.cap ? s.roster+' / '+tpl.cap : s.roster+' staff')+'</td>' +
+            '<td class="sub">'+(tpl.svc||'')+'</td>' +
+            '<td><span class="tag '+st.t+'">'+st.l+'</span></td>' +
+            '<td class="sub">'+(s.status==='none'?'Start note →':'Open note →')+'</td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+        'Two groups at 9:00 and two at 1:00 — clients are assigned to Group 1 or Group 2 and can be ' +
+        'switched between them. Opening a session opens the group note, with the roster already built ' +
+        'from who is assigned and enrolled on that date.</p></div></div>';
+    }
+
+    if (state.gsub==='week') {
+      var slots = [];
+      SESSIONS.forEach(function(s){
+        var key = s.t+'-'+s.e;
+        if (!slots.some(function(x){ return x.key===key; })) slots.push({ key:key, t:s.t, e:s.e });
+      });
+      return sub + '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr><th>Time</th>' +
+        DAYS.map(function(d){ return '<th>'+d+'</th>'; }).join('')+'</tr></thead><tbody>' +
+        slots.map(function(sl){
+          var here = SESSIONS.filter(function(s){ return s.t===sl.t && s.e===sl.e; });
+          return '<tr><td class="mono">'+fmt12(sl.t)+'<br><span class="sub">'+fmt12(sl.e)+'</span></td>' +
+            DAYS.map(function(d,di){
+              return '<td style="white-space:normal;vertical-align:top">' + here.map(function(s){
+                var tpl = GTEMPLATES.filter(function(t){ return t.n===s.n; })[0] || {};
+                return '<div style="border:1px solid var(--line); border-left:3px solid var(--accent); ' +
+                  'border-radius:4px; padding:5px 8px; margin-bottom:4px; font-size:12px;">' +
+                  (s.track?'<span class="tag info" style="margin-bottom:2px">'+s.track+'</span><br>':'') +
+                  '<b>'+s.n+'</b><br><span class="sub">'+s.fac.split(',')[0]+' · '+s.room+
+                  ' · cap '+(tpl.cap||'—')+'</span></div>';
+              }).join('') + '</td>';
+            }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+        'The recurring schedule. Parallel tracks in the same slot are how a client gets assigned to ' +
+        'Group 1 or Group 2 — and switching a client is a roster change here, not a note correction.' +
+        '</p></div></div>';
+    }
+
+    return sub + '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Group</th><th>Curriculum</th><th>Service type</th><th>Default length</th><th>Capacity</th>' +
+      '<th>Behavior</th></tr></thead><tbody>' +
+      GTEMPLATES.map(function(t){
+        return '<tr><td class="nm">'+t.n+'</td><td class="sub">'+t.cur+'</td>' +
+          '<td>'+(t.bill?'<span class="tag info">'+t.svc+'</span>':'<span class="tag mute">'+t.svc+'</span>')+'</td>' +
+          '<td class="mono">'+t.min+' min</td><td class="mono">'+(t.cap||'—')+'</td>' +
+          '<td class="sub">'+(t.note || 'Counts toward level-of-care hours')+'</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      'The service type lives on the template, which is what makes a note route to the right episode ' +
+      'no matter when it gets written. Treatment Team is the same object with a non-billable service ' +
+      'type — no hours, no charge, no overlap. Not a separate document type.</p></div></div>';
+  }
+
+  /* ---------- schedule: multi-week, multi-program counselor rotation ---------- */
+  var STAFF = [
+    { n:'Reyes',    full:'Reyes, CSAC',    tint:'#DCE9F8', ink:'#1B4E85', role:'counselor' },
+    { n:'Brody',    full:'Brody, LCSW',    tint:'#F7DFF0', ink:'#7E2F68', role:'counselor' },
+    { n:'Iyer',     full:'Iyer, CSAC-A',   tint:'#FBEBD6', ink:'#8A5307', role:'counselor' },
+    { n:'Vance',    full:'Vance, LPC',     tint:'#D9EEE4', ink:'#14603F', role:'counselor' },
+    { n:'Okonkwo',  full:'Okonkwo, LCSW',  tint:'#E6E1F8', ink:'#4B3A8C', role:'counselor' },
+    { n:'Tran',     full:'Tran, CSAC',     tint:'#F8DEDC', ink:'#8B2A20', role:'counselor' },
+    { n:'Delaney',  full:'Delaney, LPC',   tint:'#E4E7EA', ink:'#3D454D', role:'counselor' }
+  ];
+  function staff(n){ return STAFF.filter(function(s){ return s.n===n; })[0] || STAFF[6]; }
+  var ME_SCHED = 'Reyes';
+
+  var PROGRAMS = {
+    php: { label:'PHP 2.5', days:[0,1,2,3,4,5,6], pool:['Reyes','Brody','Iyer','Vance','Okonkwo','Tran'], satPool:['Delaney','Tran'],
+      slots:[
+        { t:'9:00–10:30',  mins:90, type:'Process Group' },
+        { t:'10:40–12:10', mins:90, type:'Psycho-Education' },
+        { t:'12:55–2:10',  mins:75, type:'Psycho-Education' },
+        { t:'2:20–3:35',   mins:75, type:'Psycho-Education' } ] },
+    iop: { label:'IOP 2.1', days:[0,1,2,3,4], pool:['Vance','Tran'], satPool:['Vance'],
+      slots:[
+        { t:'5:30–7:00',   mins:90, type:'Process Group' },
+        { t:'7:10–8:25',   mins:75, type:'Psycho-Education' } ] }
+  };
+
+  var DAYCOLS = [
+    { n:'Mon' },{ n:'Tue' },{ n:'Wed' },{ n:'Thu' },{ n:'Fri' },
+    { n:'Sat', light:true },{ n:'Sun', light:true }
+  ];
+  var MON0 = new Date(2026, 7, 17);            // anchor: Monday of the current week
+  function weekMeta(off){
+    var m = new Date(MON0); m.setDate(m.getDate() + off*7);
+    var dates = [];
+    for (var i=0;i<7;i++){ var x = new Date(m); x.setDate(m.getDate()+i);
+      dates.push((x.getMonth()+1)+'/'+x.getDate()); }
+    return { off:off, dates:dates,
+      label:(m.getMonth()+1)+'/'+m.getDate(),
+      state: off<0 ? 'historical' : off===0 ? 'current' : 'draft' };
+  }
+  function weekFromISO(iso){
+    var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+    var dow = (d.getDay()+6)%7; d.setDate(d.getDate()-dow);
+    return Math.round((d - MON0) / (7*24*3600*1000));
+  }
+
+  function prog(){ return PROGRAMS[state.prog]; }
+  function baseFac(w,d,s,g){
+    var P = prog();
+    if (d>=5) { var sp = P.satPool; return sp[g % sp.length]; }
+    return P.pool[(w*7 + d*3 + s*2 + g*4) % P.pool.length];
+  }
+  var schedOv = {}, combined = {}, unlocked = {};
+  function ukey(w){ return state.prog+'.'+w; }
+  var special = { 'php.0.2.1':'Guest speaker — alt note template' };
+  function sk(w,d,s,g){ return state.prog+'.'+w+'.'+d+'.'+s+'.'+g; }
+  function ck(w,d,s){ return state.prog+'.'+w+'.'+d+'.'+s; }
+  function dayClosed(d){ return prog().days.indexOf(d) < 0; }
+  function facOf(w,d,s,g){
+    if (combined[ck(w,d,s)]) g = 0;
+    return schedOv[sk(w,d,s,g)] || baseFac(w,d,s,g);
+  }
+
+  var TRACKS = [
+    { n:'Standard',   d:'Full programming',                          mod:'5 hrs/day, 20 hrs/week' },
+    { n:'PHP+',       d:'Evening housing pass; one non-programming day',
+      mod:'Expected days reduced by 1 — no false under-hours flag' },
+    { n:'Step-down',  d:'Approved transition to Level 1, 1–2 weeks',
+      mod:'Below-minimum hours permitted with authorization on file' },
+    { n:'Work/school',d:'Modified attendance for employment or education',
+      mod:'Alternate slot assignment; same weekly total' }
+  ];
+
+  /* session modality + staffing roles.
+     Responsible clinician = credentialed, present, signs (always the pill).
+     Lead = who actually delivers the activity; may be external or uncredentialed.
+     Support = shadowing / note-taking; never signs. */
+  var MODALITIES = { art:'Art therapy', guest:'Guest facilitator', std:'' };
+  var ROLES = {
+    'php.0.0.1.0': { mod:'art',   lead:'Contract art therapist' },
+    'php.0.1.2.0': { mod:'guest', lead:'Guest speaker' },
+    'php.0.2.0.1': {              lead:'Intern — leading' },
+    'php.0.3.3.0': {              support:'Intern — shadowing' }
+  };
+  function roleOf(w,d,s,g){ return ROLES[sk(w,d,s,g)] || null; }
+  function leadOpts(){
+    return [''].concat(vlist('leads').e.filter(function(x){ return x.a; }).map(function(x){ return x.l; }))
+      .concat(vlist('staff').e.filter(function(x){ return x.a; }).map(function(x){ return x.l; }));
+  }
+  function setRole(k, field, val){
+    var r = ROLES[k] || (ROLES[k] = {});
+    if (val) r[field] = val; else delete r[field];
+    if (!r.mod && !r.lead && !r.support) delete ROLES[k];
+  }
+
+  var DAYNOTES = {
+    'php.0.0':'Delaney — scheduled day off',      'php.0.1':'Tran called out',
+    'php.0.2':'Okonkwo called out',               'php.0.3':'Brody — class 11–1',
+    'php.2.1':'Vance — ASAM training',            'php.2.3':'Iyer — PTO'
+  };
+
+  /* ASAM duty — several people per day, order rotates weekly */
+  var ASAM_POOL = ['Reyes','Vance','Iyer','Brody'];
+  var asamOv = {};
+  function asamKey(w,d){ return state.prog+'.'+w+'.'+d; }
+  function asamOf(w,d){
+    if (asamOv[asamKey(w,d)]) return asamOv[asamKey(w,d)];
+    if (dayClosed(d)) return [];
+    var n = ((w+d) % 2) + 1;                       // 1–2 on duty by default
+    var out = [];
+    for (var i=0;i<n;i++) out.push(ASAM_POOL[(w+d+i) % ASAM_POOL.length]);
+    return out;
+  }
+
+  var OTHER_EVENTS = [
+    { d:1, t:'9:30–10:00',  who:'Ruiz, LPC',   what:'Individual — Nguyen, T.',   kind:'individual' },
+    { d:1, t:'1:00–1:30',   who:'Vance, RN',   what:'Nursing — Petrov, Y.',      kind:'nursing' },
+    { d:2, t:'11:00–11:30', who:'Okonkwo, MD', what:'Med mgmt — Whitfield, M.',  kind:'medical' },
+    { d:3, t:'2:00–3:00',   who:'Brody, LCSW', what:'Treatment team — staff',    kind:'staff' },
+    { d:4, t:'10:00–10:45', who:'Iyer',        what:'Case mgmt — Okafor, J.',    kind:'casemgmt' }
+  ];
+
+  function conflicts(w){
+    var out = {}; var P = prog();
+    DAYCOLS.forEach(function(_,d){
+      if (dayClosed(d)) return;
+      P.slots.forEach(function(_,s){
+        if (combined[ck(w,d,s)]) return;
+        var seen = {};
+        [0,1].forEach(function(g){
+          var f = facOf(w,d,s,g);
+          if (seen[f]!==undefined){ out[sk(w,d,s,g)]=true; out[sk(w,d,s,seen[f])]=true; }
+          else seen[f]=g;
+        });
+      });
+    });
+    return out;
+  }
+
+  function loadCounts(w){
+    var per={}, perDay={}, P=prog();
+    STAFF.forEach(function(s){ per[s.n]=0; perDay[s.n]=DAYCOLS.map(function(){return 0;}); });
+    DAYCOLS.forEach(function(_,d){
+      if (dayClosed(d)) return;
+      P.slots.forEach(function(_,s){
+        (combined[ck(w,d,s)]?[0]:[0,1]).forEach(function(g){
+          var f=facOf(w,d,s,g); if (per[f]!==undefined){ per[f]++; perDay[f][d]++; }
+        });
+      });
+    });
+    return { per:per, perDay:perDay };
+  }
+
+  function scheduleView(){
+    var w=state.week, wk=weekMeta(w), P=prog(), conf=conflicts(w), load=loadCounts(w);
+    var unl=unlocked[ukey(w)], lock=(wk.state==='historical' && !unl), nConf=Object.keys(conf).length/2;
+    var mine = state.facFilter==='mine';
+
+    var h = '<div class="card"><h2>Counselor rotation — '+P.label+', week of '+wk.label+
+      '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+      '<span class="seg">'+Object.keys(PROGRAMS).map(function(k){
+        return '<button type="button" data-prog="'+k+'" aria-pressed="'+(k===state.prog)+'">'+
+          PROGRAMS[k].label+'</button>'; }).join('')+'</span>' +
+      '<span class="seg"><button type="button" data-wstep="-1">‹</button>' +
+        [-1,0,1].map(function(k){ var m=weekMeta(w+k);
+          return '<button type="button" data-week="'+(w+k)+'" aria-pressed="'+(k===0)+'">'+m.label+
+            (m.off===0?' •':'')+'</button>'; }).join('') +
+        '<button type="button" data-wstep="1">›</button></span>' +
+      '<label class="sub" style="display:flex;gap:5px;align-items:center">Jump to ' +
+        '<input type="date" id="wjump" value="2026-08-17"></label>' +
+      (w!==0 ? '<button type="button" class="combtog" data-week="0" style="font-size:11.5px;padding:4px 9px">Today</button>' : '') +
+      '<span class="seg"><button type="button" data-ff="all" aria-pressed="'+(!mine)+
+        '">Everyone</button><button type="button" data-ff="mine" aria-pressed="'+mine+
+        '">Just mine</button></span>' +
+      '<span class="seg"><button type="button" data-sview="groups" aria-pressed="'+
+        (state.sview==='groups')+'">Groups</button><button type="button" data-sview="all" aria-pressed="'+
+        (state.sview==='all')+'">All events</button></span></span></h2>';
+
+    h += '<div class="body" style="padding:8px 16px;border-bottom:1px solid var(--line)">' +
+      '<span class="sub"><b>'+P.label+'</b> runs '+P.days.length+' days a week — '+
+      P.days.map(function(d){ return DAYCOLS[d].n; }).join(', ') +
+      '. Program days are tenant configuration, not an assumption.</span></div>';
+
+    if (lock) h += '<div class="body" style="background:var(--surface-3);border-bottom:1px solid var(--line-strong);padding:9px 16px;display:flex;flex-wrap:wrap;gap:9px;align-items:center">' +
+      '<span class="tag mute">Historical</span> <span class="sub" style="flex:1 1 340px">This week is in the past and is ' +
+      '<b>read-only</b>. QA reads the version in force on each date of service, so editing next week ' +
+      'never changes what last month\'s findings were.</span>' +
+      '<button type="button" class="combtog" data-unlock="'+w+'" style="font-size:11.5px;padding:5px 11px">' +
+      'Unlock for correction</button></div>';
+
+    if (unl) h += '<div class="body" style="background:var(--warn-soft);border-bottom:1px solid var(--warn);padding:9px 16px;display:flex;flex-wrap:wrap;gap:9px;align-items:center">' +
+      '<span class="tag warn">Retroactive correction</span> <span class="sub" style="flex:1 1 340px">' +
+      'Unlocked by <b>C. Ruiz, QA</b> — '+unl+'. Edits create a new version of this week; the original ' +
+      'is retained, and anything already billed against it is re-checked rather than silently changed.</span>' +
+      '<button type="button" class="combtog" data-relock="'+w+'" style="font-size:11.5px;padding:5px 11px">' +
+      'Re-lock</button></div>';
+
+    if (nConf && !lock) h += '<div class="body" style="background:var(--alert-soft);border-bottom:1px solid var(--alert);padding:9px 16px">' +
+      '<span class="tag bad">Double-booked</span> <span class="sub">'+nConf+' slot'+(nConf>1?'s':'')+
+      ' with the same facilitator on both groups. Mark the slot <b>combined</b> if that is intentional.</span></div>';
+
+    h += '<div class="tw" style="border:0;box-shadow:none"><table class="sched"><thead><tr>' +
+      '<th style="min-width:96px">Group time</th>' +
+      DAYCOLS.map(function(dc,i){
+        return '<th'+(dc.light?' class="satcol"':'')+'>'+dc.n+'<br><span class="sub mono">'+
+          wk.dates[i]+'</span></th>'; }).join('')+'</tr></thead><tbody>';
+
+    P.slots.forEach(function(sl,s){
+      h += '<tr><td class="slotcell"><b>'+sl.t+'</b><br><span class="sub">'+sl.mins+' min</span><br>' +
+        '<span class="sub">'+sl.type+'</span></td>';
+      DAYCOLS.forEach(function(dc,d){
+        h += '<td'+(dc.light?' class="satcol"':'')+'>';
+        if (dayClosed(d)) { h += '<span class="sub">Closed</span></td>'; return; }
+        var comb=combined[ck(w,d,s)], sp=special[ck(w,d,s)];
+        if (sp) h += '<div class="spec">'+sp+'</div>';
+        (comb?[0]:[0,1]).forEach(function(g){
+          var f=facOf(w,d,s,g), st=staff(f), bad=conf[sk(w,d,s,g)];
+          var dim = mine && f!==ME_SCHED;
+          var rl = roleOf(w,d,s,g);
+          h += '<div class="gline'+(bad?' bad':'')+(dim?' dim':'')+'">' +
+            '<span class="gtag'+(comb?' comb':'')+'">'+(comb?'Combined':'Grp '+(g+1))+'</span>' +
+            (lock ? '<span class="facpill" style="background:'+st.tint+';color:'+st.ink+'">'+f+'</span>'
+                  : '<button class="facpill" data-fac="'+sk(w,d,s,g)+'" style="background:'+st.tint+
+                    ';color:'+st.ink+'">'+f+'</button>') + '</div>';
+          var rkey = sk(w,d,s,g);
+          if (rl) {
+            if (rl.mod && MODALITIES[rl.mod]) h += '<div class="modchip">'+MODALITIES[rl.mod]+'</div>';
+            if (rl.lead)    h += '<div class="rolenote">Led by '+rl.lead+'</div>';
+            if (rl.support) h += '<div class="rolenote">'+rl.support+'</div>';
+          }
+          if (!lock) {
+            if (state.editRole === rkey) {
+              h += '<div class="rolepanel">' +
+                '<div class="rl"><span>Session type</span><select data-rset="'+rkey+'|mod">' +
+                  ['','art','guest'].map(function(m){
+                    return '<option value="'+m+'"'+((rl&&rl.mod||'')===m?' selected':'')+'>'+
+                      (m?MODALITIES[m]:'Standard')+'</option>'; }).join('')+'</select></div>' +
+                '<div class="rl"><span>Led by</span><select data-rset="'+rkey+'|lead">' +
+                  leadOpts().map(function(o){
+                    return '<option value="'+o+'"'+((rl&&rl.lead||'')===o?' selected':'')+'>'+
+                      (o||'— the assigned clinician —')+'</option>'; }).join('')+'</select></div>' +
+                '<div class="rl"><span>Support</span><select data-rset="'+rkey+'|support">' +
+                  leadOpts().map(function(o){
+                    return '<option value="'+o+'"'+((rl&&rl.support||'')===o?' selected':'')+'>'+
+                      (o||'— none —')+'</option>'; }).join('')+'</select></div>' +
+                '<button type="button" class="combtog" data-rclose="1">done</button></div>';
+            } else {
+              h += '<button class="rolebtn" data-redit="'+rkey+'" title="Session type, lead, support">'+
+                (rl?'edit roles':'+ roles')+'</button>';
+            }
+          }
+        });
+        if (!lock) h += '<button class="combtog" data-comb="'+ck(w,d,s)+'">'+(comb?'split':'combine')+'</button>';
+        h += '</td>';
+      });
+      h += '</tr>';
+    });
+
+    h += '<tr class="asamrow"><td class="slotcell"><b>ASAM duty</b><br><span class="sub">rotates weekly</span></td>' +
+      DAYCOLS.map(function(dc,d){
+        if (dayClosed(d)) return '<td class="satcol"><span class="sub">—</span></td>';
+        var on = asamOf(w,d);
+        return '<td'+(dc.light?' class="satcol"':'')+'>' +
+          on.map(function(f){ var st=staff(f);
+            return '<span class="facpill" style="background:'+st.tint+';color:'+st.ink+
+              ';margin:0 3px 3px 0">'+f+
+              (lock?'':'<span class="x" data-asamrm="'+w+'.'+d+'|'+f+'">×</span>')+'</span>'; }).join('') +
+          (lock?'':'<button class="combtog" data-asamadd="'+w+'.'+d+'">+ add</button>') + '</td>';
+      }).join('')+'</tr>';
+
+    h += '<tr class="noterow"><td class="slotcell"><b>Day notes</b></td>' +
+      DAYCOLS.map(function(dc,d){
+        var nk = state.prog+'.'+w+'.'+d, n = DAYNOTES[nk];
+        var cell;
+        if (state.editNote === nk && !lock) {
+          cell = '<input type="text" class="noteinput" data-nset="'+nk+'" value="'+(n||'')+
+            '" placeholder="called out, PTO, class…">';
+        } else {
+          cell = (n?'<span class="daynote">'+n+'</span>':'<span class="sub">—</span>') +
+            (lock?'':' <button class="rolebtn" data-nedit="'+nk+'">'+(n?'edit':'+ note')+'</button>');
+        }
+        return '<td'+(dc.light?' class="satcol"':'')+'>'+cell+'</td>';
+      }).join('')+'</tr>';
+
+    if (state.sview==='all') {
+      h += '<tr class="otherrow"><td class="slotcell"><b>Other</b><br><span class="sub">optional</span></td>' +
+        DAYCOLS.map(function(dc,d){
+          var evs = OTHER_EVENTS.filter(function(e){ return e.d===d; });
+          return '<td'+(dc.light?' class="satcol"':'')+'>'+(evs.length?evs.map(function(e){
+            return '<div class="oth '+e.kind+'"><b class="mono">'+e.t+'</b><br>'+e.what+
+              '<br><span class="sub">'+e.who+'</span></div>'; }).join(''):'<span class="sub">—</span>')+'</td>';
+        }).join('')+'</tr>';
+    }
+
+    h += '</tbody></table></div><div class="body" style="border-top:1px solid var(--line)">' +
+      '<p class="demonote">Click a name to reassign. <b>Combine</b> merges Group 1 and 2 into one ' +
+      'session — deliberate, so it never flags. Past weeks lock; the schedule is versioned and ' +
+      'effective-dated, so QA reads the version in force on each date of service.</p></div></div>';
+
+    h += '<div class="card"><h2>Who is in the room</h2><div class="tw" style="border:0;box-shadow:none">' +
+      '<table><thead><tr><th>Role</th><th>Credentialed?</th><th>Signs the note?</th><th>Example</th>' +
+      '</tr></thead><tbody>' +
+      '<tr><td class="nm">Responsible clinician</td><td>Required</td>' +
+      '<td><span class="tag ok">Yes</span></td>' +
+      '<td class="sub">The pill in every cell. Present, accountable, attests firsthand.</td></tr>' +
+      '<tr><td class="nm">Lead / facilitator</td><td>Not required</td>' +
+      '<td><span class="tag mute">No</span></td>' +
+      '<td class="sub">Contract art therapist · guest speaker · intern leading the group</td></tr>' +
+      '<tr><td class="nm">Support</td><td>Not required</td>' +
+      '<td><span class="tag mute">No</span></td>' +
+      '<td class="sub">Intern shadowing or taking notes alongside the clinician</td></tr>' +
+      '</tbody></table></div><div class="body" style="border-top:1px solid var(--line)">' +
+      '<p class="demonote">Delivery and attestation are separate. A spreadsheet has to fold them into ' +
+      'one cell — <b>Reyes (Guest)</b>, <b>Intern (Reyes)</b>, <b>Reyes (Intern)</b> all look alike but ' +
+      'mean different things, and you have to know who is licensed to read them. As two fields the ' +
+      'ambiguity disappears, and signature authority can be enforced instead of assumed. See Mon 10:40, ' +
+      'Tue 12:55, Wed 9:00 and Thu 2:20 this week.</p></div></div>';
+
+    h += '<div class="card"><h2>Facilitator load — '+P.label+', week of '+wk.label+
+      '<span class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">' +
+      'Even distribution is the point, unless running groups is the whole job.</span></h2>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr><th>Facilitator</th>' +
+      DAYCOLS.map(function(dc){ return '<th>'+dc.n+'</th>'; }).join('')+
+      '<th>Week</th><th>Hours</th></tr></thead><tbody>' +
+      STAFF.filter(function(s){ return s.role==='counselor' && (!mine || s.n===ME_SCHED); })
+        .map(function(s){
+          var tot=load.per[s.n], days=load.perDay[s.n], hrs=0;
+          DAYCOLS.forEach(function(_,d){ if (dayClosed(d)) return;
+            P.slots.forEach(function(sl,si){
+              (combined[ck(w,d,si)]?[0]:[0,1]).forEach(function(g){
+                if (facOf(w,d,si,g)===s.n) hrs += sl.mins/60; }); }); });
+          var hi = tot>=9, lo = tot<=3 && tot>0;
+          return '<tr><td><span class="facpill" style="background:'+s.tint+';color:'+s.ink+'">'+s.n+'</span></td>' +
+            days.map(function(n){ return '<td class="mono">'+(n||'<span class="sub">—</span>')+'</td>'; }).join('') +
+            '<td class="mono"><b>'+tot+'</b></td>' +
+            '<td>'+(hi?'<span class="tag warn">'+hrs.toFixed(1)+' h</span>'
+                     :lo?'<span class="tag mute">'+hrs.toFixed(1)+' h</span>'
+                     :'<span class="mono">'+hrs.toFixed(1)+' h</span>')+'</td></tr>';
+        }).join('')+'</tbody></table></div></div>';
+
+    h += '<div class="card"><h2>Tracks <span class="sub" style="text-transform:none;letter-spacing:0;' +
+      'font-weight:400">A track modifies expected programming — which means it modifies the rules</span></h2>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Track</th><th>What it means</th><th>Effect on the hours rule</th><th>Clients</th>' +
+      '</tr></thead><tbody>'+TRACKS.map(function(t){
+        var n = clients.filter(function(c){ return c.track===t.n; }).length;
+        return '<tr><td class="nm">'+t.n+'</td><td class="sub">'+t.d+'</td><td class="sub">'+t.mod+
+          '</td><td class="mono">'+n+'</td></tr>'; }).join('') +
+      '</tbody></table></div><div class="body" style="border-top:1px solid var(--line)">' +
+      '<p class="demonote">PHP+ is the one worth staring at — an evening housing pass that used to ' +
+      'come with a non-programming day, untracked, so hours never reconciled. As a track it becomes a ' +
+      'first-class modifier on the expected-hours rule and stops generating false findings.</p></div></div>';
+
+    return h;
+  }
+
+  /* ---------- value lists — define once, reference everywhere ---------- */
+  var VLISTS = [
+    { id:'staff', n:'Staff & credentials', own:'tenant', scope:'Agency',
+      used:['Schedule — facilitator','Care team','Signatures','Caseload assignment'],
+      e:[ {id:'S-01',l:'Reyes, CSAC',a:true,u:96},   {id:'S-02',l:'Brody, LCSW',a:true,u:88},
+          {id:'S-03',l:'Iyer, CSAC-A',a:true,u:74},  {id:'S-04',l:'Vance, LPC',a:true,u:81},
+          {id:'S-05',l:'Okonkwo, LCSW',a:true,u:69}, {id:'S-06',l:'Tran, CSAC',a:true,u:77},
+          {id:'S-07',l:'Delaney, LPC',a:true,u:52},  {id:'S-08',l:'Whitmore, CSAC',a:false,u:31} ] },
+    { id:'leads', n:'Non-staff session leads', own:'tenant', scope:'Agency',
+      used:['Schedule — led by','Schedule — support'],
+      e:[ {id:'L-01',l:'Contract art therapist',a:true,u:34},
+          {id:'L-02',l:'Guest speaker',a:true,u:11},
+          {id:'L-03',l:'Intern — leading',a:true,u:22},
+          {id:'L-04',l:'Intern — shadowing',a:true,u:19},
+          {id:'L-05',l:'Volunteer facilitator',a:false,u:3} ] },
+    { id:'modality', n:'Session types', own:'tenant', scope:'Agency',
+      used:['Schedule — session type','Group note template selection'],
+      e:[ {id:'M-01',l:'Standard curriculum',a:true,u:412},
+          {id:'M-02',l:'Art therapy',a:true,u:38},
+          {id:'M-03',l:'Guest facilitator',a:true,u:12},
+          {id:'M-04',l:'Combined groups',a:true,u:9} ] },
+    { id:'tracks', n:'Programming tracks', own:'tenant', scope:'Per program',
+      used:['Census column','Schedule','Expected-hours rule'],
+      e:[ {id:'T-01',l:'Standard',a:true,u:24}, {id:'T-02',l:'PHP+',a:true,u:6},
+          {id:'T-03',l:'Step-down',a:true,u:2}, {id:'T-04',l:'Work/school',a:true,u:3} ] },
+    { id:'flags', n:'Client flags', own:'tenant', scope:'Agency',
+      used:['Census face card','Chart header','Group note roster'],
+      e:[ {id:'F-01',l:'Allergies',a:true,u:14}, {id:'F-02',l:'Safety plan',a:true,u:9},
+          {id:'F-03',l:'Elopement risk',a:true,u:3}, {id:'F-04',l:'Fall precautions',a:true,u:2},
+          {id:'F-05',l:'MOUD',a:true,u:17}, {id:'F-06',l:'Interpreter required',a:true,u:4},
+          {id:'F-07',l:'Court-involved',a:true,u:8} ] },
+    { id:'progress', n:'Objective progress scale', own:'tenant', scope:'Agency',
+      used:['Individual progress note','Objective trend','30-day review'],
+      e:[ {id:'P-01',l:'Not addressed',a:true,u:0}, {id:'P-02',l:'Regressed',a:true,u:0},
+          {id:'P-03',l:'No progress',a:true,u:0}, {id:'P-04',l:'Progressing',a:true,u:0},
+          {id:'P-05',l:'Completed',a:true,u:0} ] },
+    { id:'partic', n:'Group participation', own:'tenant', scope:'Agency',
+      used:['Group note — client entry','Group notes report'],
+      e:[ {id:'G-01',l:'Active',a:true,u:0}, {id:'G-02',l:'Engaged',a:true,u:0},
+          {id:'G-03',l:'Minimal',a:true,u:0}, {id:'G-04',l:'Disruptive',a:true,u:0},
+          {id:'G-05',l:'Observed only',a:true,u:0}, {id:'G-06',l:'Absent',a:true,u:0} ] },
+    { id:'dnb', n:'Do-not-bill reasons', own:'tenant', scope:'Agency',
+      used:['Billing — do-not-bill'],
+      e:[ {id:'D-01',l:'Client hospitalized',a:true,u:5}, {id:'D-02',l:'Duplicate service',a:true,u:2},
+          {id:'D-03',l:'Service not rendered',a:true,u:1}, {id:'D-04',l:'Documentation unrecoverable',a:true,u:0} ] },
+    { id:'retract', n:'Signature retraction reasons', own:'tenant', scope:'Agency',
+      used:['Note signing — retraction window'],
+      e:[ {id:'R-01',l:'Wrong service time entered',a:true,u:0},
+          {id:'R-02',l:'Signed before entry was finished',a:true,u:0},
+          {id:'R-03',l:'Roster correction needed',a:true,u:0},
+          {id:'R-04',l:'Content error in entry',a:true,u:0} ] },
+    { id:'dcreason', n:'Discharge reasons', own:'tenant', scope:'Per program',
+      used:['Episode discharge','Recently discharged','Outcomes report'],
+      e:[ {id:'X-01',l:'Completed treatment',a:true,u:41},
+          {id:'X-02',l:'Stepped down to IOP',a:true,u:28},
+          {id:'X-03',l:'Left against advice',a:true,u:17},
+          {id:'X-04',l:'Administrative discharge',a:true,u:6},
+          {id:'X-05',l:'Transferred — higher level',a:true,u:9} ] },
+    { id:'loc', n:'Levels of care', own:'system', scope:'State / payer',
+      used:['Census','Episodes','Schedule','Billing rules'],
+      e:[ {id:'2.1',l:'IOP 2.1',a:true,u:0}, {id:'2.5',l:'PHP 2.5',a:true,u:0},
+          {id:'3.1',l:'RES 3.1',a:true,u:0}, {id:'3.5',l:'RES 3.5',a:true,u:0},
+          {id:'1.0',l:'OP 1.0',a:true,u:0} ] },
+    { id:'payers', n:'Payers & plans', own:'system', scope:'State',
+      used:['Demographics','Authorizations','Claims','Rule composition'],
+      e:[ {id:'PY-1',l:'Anthem HealthKeepers',a:true,u:0},{id:'PY-2',l:'Aetna Better Health',a:true,u:0},
+          {id:'PY-3',l:'Humana Healthy Horizons',a:true,u:0},{id:'PY-4',l:'Sentara Community Plan',a:true,u:0},
+          {id:'PY-5',l:'UnitedHealthcare',a:true,u:0},{id:'PY-6',l:'Cardinal Care FFS',a:true,u:0} ] }
+  ];
+  function vlist(id){ return VLISTS.filter(function(x){ return x.id===id; })[0]; }
+
+  var USAGE_SHAPES = {
+    staff:    { label:'Assignment',   fmt:function(i){ return ['Group note','Individual note','Schedule slot'][i%3]+' — 08/'+(2+i%26); } },
+    leads:    { label:'Session',      fmt:function(i){ return 'Group session — 08/'+(2+i%26)+', '+['9:00','10:40','12:55','2:20'][i%4]; } },
+    modality: { label:'Session',      fmt:function(i){ return 'Scheduled session — 08/'+(2+i%26); } },
+    tracks:   { label:'Client',       fmt:function(i){ return 'Client chart — MRN 004'+(600+i*7); } },
+    flags:    { label:'Client',       fmt:function(i){ return 'Client chart — MRN 004'+(600+i*11); } },
+    dnb:      { label:'Billing',      fmt:function(i){ return 'Do-not-bill marker — 08/'+(2+i%26); } },
+    dcreason: { label:'Episode',      fmt:function(i){ return 'Discharge — 0'+(6+i%3)+'/'+(2+i%26)+'/2026'; } }
+  };
+  function usageView(){
+    var u = state.usage, L = vlist(u.l), en = L.e[u.i];
+    var shape = USAGE_SHAPES[L.id] || { label:'Record', fmt:function(i){ return 'Record #'+(1000+i); } };
+    var n = Math.min(en.u, 40);
+    return '<div class="card"><h2>“'+en.l+'” — where it is used' +
+      '<button type="button" class="combtog" data-list="'+L.id+'" style="font-size:11.5px;padding:5px 11px">' +
+      '← back to '+L.n+'</button></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px"><span class="sub">' +
+      '<b class="mono">'+en.u+'</b> record'+(en.u===1?'':'s')+' reference <span class="mono">'+en.id+
+      '</span>. '+(en.u>40?'Showing the first 40. ':'')+'Retiring this value hides it from new entries; ' +
+      'every record below keeps resolving.</span></div>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>'+shape.label+'</th><th>Reference</th><th></th></tr></thead><tbody>' +
+      Array.apply(null,{length:n}).map(function(_,i){
+        return '<tr><td class="nm">'+shape.fmt(i)+'</td><td class="mono sub">'+en.id+'</td>' +
+          '<td class="sub">Open →</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      (en.u===0 ? '<div class="body"><span class="sub">Nothing references this value yet — safe to ' +
+        'delete outright rather than retire.</span></div>' : '') +
+      '</div>';
+  }
+
+  /* ================= authorization coverage =================
+     Rebuilt again. The spreadsheet tracks ROWS SOMEONE MAINTAINS. This tracks
+     COVERAGE OF SERVICE DAYS, and derives the work from it. No status codes, no
+     Upcoming placeholder lines — a work item appears when it is due. */
+
+  var TODAY = new Date(2026,7,24);
+  function addD(dt,n){ var x=new Date(dt.getTime()); x.setDate(x.getDate()+n); return x; }
+  function dd(a,b){ return Math.round((a-b)/86400000); }
+  function fdate(dt){ return dt ? pad(dt.getMonth()+1)+'/'+pad(dt.getDate())+'/'+dt.getFullYear() : '—'; }
+  function fshort(dt){ return dt ? pad(dt.getMonth()+1)+'/'+pad(dt.getDate()) : '—'; }
+  function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+
+  var FACILITIES = [ { id:'br', n:'Broad Street' }, { id:'ss', n:'Southside' } ];
+  var DUE_OFFSET = 3;      /* tenant config (J-01, J-04) — not logic */
+  var PEND_COVERS = true;  /* agency setting, NOT a product rule — see R-PEND */
+
+  var SERVICES = {
+    php:   { n:'PHP 2.5',           code:'H0035',    span:42, unit:'days'  },
+    iop:   { n:'IOP 2.1',           code:'S9480',    span:60, unit:'days'  },
+    r35:   { n:'RES 3.5',           code:'H0018',    span:14, unit:'days'  },
+    r31:   { n:'RES 3.1',           code:'H0019',    span:30, unit:'days'  },
+    peeri: { n:'Peer — individual', code:'H0038',    span:90, unit:'units' },
+    peerg: { n:'Peer — group',      code:'H0038 HQ', span:90, unit:'units' }
+  };
+  var AUTH_OWNERS = ['Reyes, CSAC','Brody, LCSW','Vance, LPC','Osgood — UR','Ferrand — UR'];
+  var CORR_KINDS = ['Request faxed','Acknowledgment received','Additional information requested',
+    'Additional information sent','Decision letter received','Peer-to-peer scheduled'];
+
+  var AUTH_RULES = {
+    'R-COVER': { layer:'DMAS ARTS', label:'Coverage',
+      text:'A service day is reimbursable if it falls inside an approved authorization period. '+
+           'A day inside no approved period and with no request in flight is a day at risk.',
+      src:'ARTS Provider Manual Ch. VI — Utilization Review' },
+    'R-PEND':  { layer:'Payer contract', label:'Does a pending request cover the gap?', warn:true,
+      text:'UNSETTLED. When approved coverage ends while a timely request is still awaiting a '+
+           'decision, whether those days are ultimately paid depends on the payer and on whether the '+
+           'request was submitted in time — an approval may be retroactive to the requested start '+
+           'date. The product does NOT decide this. The toggle on the board is the agency setting; '+
+           'until real contract terms are loaded, a pending request is treated as in flight rather '+
+           'than as a loss.',
+      src:'Open question — not determined. Do not treat either answer as settled.' },
+    'R-DUE':   { layer:'Agency policy', label:'When the next request is due',
+      text:'Due = covered-through date minus a configurable offset, currently '+DUE_OFFSET+' days. '+
+           'The work item is derived from the covered-through date and appears on its own — there is '+
+           'no placeholder row for anyone to create or forget. It appears whether the previous '+
+           'request was approved or is still pending, because the coverage runs out either way.',
+      src:'Agency policy — offset is tenant configuration, not logic (J-01, J-04)' },
+    'R-EXT-FFS':{ layer:'DMAS ARTS', label:'Extension window — FFS, ASAM 2.1–4.0',
+      text:'Submit prior to the current authorization ending, no greater than 5 calendar days prior. '+
+           'Received after the end date, the extension begins on the day of receipt. Regulatory outer '+
+           'bound; the agency due date sits inside it.',
+      src:'ARTS Provider Manual Ch. IV (rev. 7/7/2025)' },
+    'R-EXT-MCO':{ layer:'Payer contract', label:'Extension window — MCO', warn:true,
+      text:'No contract terms loaded. Falling back to the DMAS FFS window until the plan’s own '+
+           'timeframe is configured. Placeholder, not a finding.',
+      src:'Tenant configuration — unset (Q-16)' },
+    'R-RESP':  { layer:'Agency policy', label:'Awaiting decision',
+      text:'A submitted request with no decision after 3 days is surfaced for follow-up.',
+      src:'Agency policy' },
+    'R-DENY':  { layer:'Clinical', label:'Denied — transition needed',
+      text:'A denial that stands is a clinical event, not a paperwork one. The client needs a level '+
+           'of care they are authorized for: step down, transfer, or discharge. Every day between '+
+           'the denial and that decision is uncovered.',
+      src:'Product rule — derived from the tracker’s 42 → 43/44 path' },
+    'R-DIT':   { layer:'Agency policy', label:'Days in treatment',
+      text:'Counts from admit, and resets from the transfer date on a level-of-care change. Both are '+
+           'kept: days at the current level, and total days in episode.',
+      src:'Agency policy' },
+    'R-SA-REQ':{ layer:'DMAS ARTS', label:'Which levels require authorization',
+      text:'ASAM 3.1–4.0, 2.5 and 2.1 require service authorization. 1.0, OTP, OBAT and SBIRT do not.',
+      src:'ARTS Provider Manual Ch. IV' }
+  };
+  function ruleTag(id){
+    var r = AUTH_RULES[id];
+    return '<span class="rulechip'+(r.warn?' warn':'')+'" data-rule="'+id+'">'+id+'</span>';
+  }
+
+  /* ---- build coverage records ---- */
+  var auths = [];
+  var SCEN = ['covered','duenow','awaiting','covered','uncov-pending','denied','covered','duesoon',
+              'awaiting','p2p','covered','uncov-nothing','duenow','appeal','covered','newadmit',
+              'discharging','covered','uncov-denied','duesoon','awaiting','covered'];
+
+  (function build(){
+    var n = 0, si = 0, defectN = 0;
+    clients.forEach(function(c){
+      if (!SERVICES[c.loc.id]){ c.noSA = true; return; }
+      c.fac = FACILITIES[Math.floor(rnd()*FACILITIES.length)].id;
+      c.insId = String(1000000000 + Math.floor(rnd()*899999999));
+      c.expEnd = addD(TODAY, 12 + Math.floor(rnd()*105));
+      /* an active client whose projected discharge is in the past is nonsense —
+         the census generator allowed it, so correct it here */
+      var pp = c.projDC.split('/'), pdc = new Date(+pp[2], +pp[0]-1, +pp[1]);
+      if (pdc <= TODAY) c.projDC = fdate(addD(TODAY, 10 + Math.floor(rnd()*56)));
+      if (c.los > 34 && rnd() < .35)
+        c.transfer = { d: addD(TODAY, -(6 + Math.floor(rnd()*20))), from:'PHP 2.5', to:'IOP 2.1' };
+      mk(c, c.loc.id, SCEN[si++ % SCEN.length]);
+      if (rnd() < .35) mk(c, rnd()<.5?'peeri':'peerg', SCEN[si++ % SCEN.length]);
+    });
+
+    function mk(c, svcId, sc){
+      var svc = SERVICES[svcId];
+      /* where does approved coverage end, relative to today? */
+      var ct;                                   // covered through
+      if (sc==='covered')            ct = addD(TODAY, 8 + Math.floor(rnd()*24));
+      else if (sc==='duesoon')       ct = addD(TODAY, DUE_OFFSET + 1 + Math.floor(rnd()*3));
+      else if (sc==='duenow')        ct = addD(TODAY, Math.floor(rnd()*(DUE_OFFSET+1)));
+      else if (sc==='awaiting')      ct = addD(TODAY, 1 + Math.floor(rnd()*4));
+      else if (sc==='discharging')   ct = addD(TODAY, 2 + Math.floor(rnd()*4));
+      else if (sc==='newadmit')      ct = null;                                   // never authorized
+      else if (sc==='denied' || sc==='p2p' || sc==='appeal')
+                                     ct = addD(TODAY, 2 + Math.floor(rnd()*7));   // denied, still covered
+      else                           ct = addD(TODAY, -(1 + Math.floor(rnd()*7))); // uncovered family
+
+      /* approved history behind it */
+      var periods = [], pend = ct ? new Date(ct) : null;
+      if (ct){
+        var back = 1 + Math.floor(rnd()*2);
+        for (var i=0;i<back;i++){
+          var ps = addD(pend, -(svc.span-1));
+          periods.unshift({ start:ps, end:new Date(pend), units:svc.span,
+            outcome:'Approved', num:'A'+(88400000+Math.floor(rnd()*90000)) });
+          pend = addD(ps, -1);
+        }
+      }
+
+      /* the request in flight, if any */
+      var req = null;
+      if (sc==='awaiting' || sc==='uncov-pending'){
+        req = { start: addD(ct,1), end: addD(ct, svc.span), units:svc.span,
+                submitted: addD(TODAY, -(1+Math.floor(rnd()*7))), decision:null };
+      } else if (sc==='denied' || sc==='uncov-denied'){
+        var sub = addD(TODAY, -(5+Math.floor(rnd()*6)));
+        req = { start: addD(ct,1), end: addD(ct, svc.span), units:svc.span,
+                submitted: sub, decision:'Denied', decidedOn: addD(sub, 2) };
+      } else if (sc==='p2p'){
+        var sub2 = addD(TODAY, -(6+Math.floor(rnd()*5)));
+        req = { start: addD(ct,1), end: addD(ct, svc.span), units:svc.span,
+                submitted: sub2, decision:'Denied', decidedOn: addD(sub2, 2),
+                p2p: addD(TODAY, 1+Math.floor(rnd()*3)),
+                p2pT: ['9:00a','11:30a','1:00p','2:30p'][Math.floor(rnd()*4)] };
+      } else if (sc==='appeal'){
+        var sub3 = addD(TODAY, -(12+Math.floor(rnd()*8)));
+        req = { start: addD(ct,1), end: addD(ct, svc.span), units:svc.span,
+                submitted: sub3, decision:'Denied', decidedOn: addD(sub3, 2),
+                appealed: addD(sub3, 5) };
+      }
+
+      /* real coverage defects — the kind that survive leaving a spreadsheet */
+      if (periods.length > 1){
+        defectN++;
+        if (defectN % 5 === 1)                             // gap: a period starts late
+          periods[1].start = addD(periods[1].start, 2 + Math.floor(rnd()*3));
+        else if (defectN % 5 === 3)                        // overlap: approved twice
+          periods[1].start = addD(periods[1].start, -(2 + Math.floor(rnd()*4)));
+      }
+
+      /* documented service days — some fall past the covered-through date */
+      var days = [], d0 = periods.length ? new Date(periods[0].start) : addD(TODAY,-10);
+      var stop = addD(TODAY, -1);
+      var cur = new Date(d0);
+      while (cur <= stop){
+        if (rnd() < (svc.unit==='days' ? .62 : .22)) days.push(new Date(cur));
+        cur = addD(cur, 1);
+      }
+
+      var corr = [];
+      if (req){
+        var cd = new Date(req.submitted);
+        var cn = req.decision ? 3 : 1 + Math.floor(rnd()*2);
+        for (var k=0;k<cn;k++){
+          if (cd > TODAY) break;
+          corr.push({ d:new Date(cd), what:CORR_KINDS[Math.min(k, CORR_KINDS.length-1)],
+            who: k%2 ? c.payer : AUTH_OWNERS[Math.floor(rnd()*AUTH_OWNERS.length)] });
+          cd = addD(cd, 1+Math.floor(rnd()*4));
+        }
+      }
+
+      auths.push({
+        id:'CV-'+pad(++n)+String(100+Math.floor(rnd()*800)), scen:sc,
+        c:c, svc:svc, svcId:svcId, fac:c.fac, mco:c.payer, counselor:c.couns,
+        owner: (n % 8 === 3) ? null : AUTH_OWNERS[Math.floor(rnd()*AUTH_OWNERS.length)],
+        coveredThrough: ct, periods:periods, req:req, days:days, corr:corr,
+        prevAuth: periods.length ? periods[periods.length-1].num : null,
+        followup: rnd() > .3,
+        transition: (sc==='uncov-denied')
+      });
+    }
+  })();
+
+  /* discharged clients with an unresolved authorization keep a record — K-22 */
+  var archMap = {};
+  (function buildArchive(){
+    discharged.forEach(function(c, i){
+      if (!SERVICES[c.loc.id]) return;
+      if (i % 3 !== 0) return;                      // most leave with nothing outstanding
+      c.fac = FACILITIES[i % FACILITIES.length].id;
+      c.insId = String(1000000000 + Math.floor(rnd()*899999999));
+      var svc = SERVICES[c.loc.id];
+      var ct = addD(TODAY, -(6 + Math.floor(rnd()*14)));
+      var sub = addD(ct, -4);
+      archMap[c.id] = {
+        id:'CV-A'+i, c:c, svc:svc, svcId:c.loc.id, fac:c.fac, mco:c.payer, counselor:c.couns,
+        owner: AUTH_OWNERS[i % AUTH_OWNERS.length], coveredThrough: ct,
+        periods:[{ start:addD(ct,-(svc.span-1)), end:new Date(ct), units:svc.span,
+                   outcome:'Approved', num:'A'+(88400000+Math.floor(rnd()*90000)) }],
+        req:{ start:addD(ct,1), end:addD(ct,svc.span), units:svc.span, submitted:sub,
+              decision:'Denied', decidedOn:addD(sub,2), appealed:addD(sub,5) },
+        days:[], corr:[], prevAuth:'A'+(88400000+Math.floor(rnd()*90000)), followup:true,
+        archived:true
+      };
+    });
+  })();
+  function archOf(c){ return archMap[c.id] || null; }
+
+  /* ---- derived state. Plain language, no codes. ---- */
+  function cov(a){
+    var ct = a.coveredThrough;
+    var pending = !!(a.req && !a.req.decision);
+    var apprGone = !ct || dd(TODAY, ct) > 0;          // no APPROVED period covers today
+    var lapsedDays = (apprGone && ct) ? dd(TODAY, ct) : null;
+    /* uncovered = approved coverage gone AND nothing in flight (or the agency counts
+       pending as uncovered — R-PEND, their call, not ours) */
+    var inFlight = pending || (a.req && (a.req.p2p || a.req.appealed));
+    var uncovered = apprGone && (!inFlight || (pending && !PEND_COVERS));
+    var due = ct ? addD(ct, -DUE_OFFSET) : null;
+    var dueIn = due ? dd(due, TODAY) : null;
+    var waiting = pending ? dd(TODAY, a.req.submitted) : null;
+    var st, tone, why;
+
+    if (uncovered){
+      st = 'Uncovered'; tone = 'bad';
+      why = !ct ? 'Admitted with no authorization on file yet.'
+          : pending ? 'Approved coverage ended '+fdate(ct)+'. A request submitted '+
+              fdate(a.req.submitted)+' is still undecided — counted as uncovered because the agency '+
+              'setting says pending does not cover.'
+          : a.req && a.req.decision==='Denied' ? 'Denied '+fdate(a.req.decidedOn)+
+              ' and not challenged. Approved coverage ended '+fdate(ct)+'.'
+          : 'Approved coverage ended '+fdate(ct)+' and nothing has been submitted.';
+    }
+    else if (a.req && a.req.p2p){ st = 'Peer to peer'; tone = 'warn';
+      why = 'Denial challenged. Call '+fdate(a.req.p2p)+' '+a.req.p2pT+'. Approved through '+fdate(ct)+
+            (apprGone ? ' — '+plural(lapsedDays,'day')+' past it.' : '.'); }
+    else if (a.req && a.req.appealed){ st = 'Appeal pending'; tone = 'warn';
+      why = 'Appeal filed '+fdate(a.req.appealed)+'. Approved through '+fdate(ct)+
+            (apprGone ? ' — '+plural(lapsedDays,'day')+' past it.' : '.'); }
+    else if (a.req && a.req.decision==='Denied'){ st = 'Denied — transition'; tone = 'bad';
+      why = 'Denied '+fdate(a.req.decidedOn)+'. Approved coverage runs out '+fdate(ct)+
+            ' — the client needs a level of care they are authorized for.'; }
+    else if (pending && apprGone){ st = 'Pending past coverage'; tone = 'warn';
+      why = 'Submitted '+fdate(a.req.submitted)+' — '+plural(waiting,'day')+' ago. Approved coverage '+
+            'ended '+fdate(ct)+', so '+plural(lapsedDays,'day')+' now sit behind an undecided '+
+            'request. Whether they are paid depends on the payer and on timeliness.'; }
+    else if (pending){ st = 'Awaiting decision'; tone = 'info';
+      why = 'Submitted '+fdate(a.req.submitted)+' — '+plural(waiting,'day')+' ago. Approved through '+
+            fdate(ct)+'.'; }
+    else if (dueIn !== null && dueIn <= 0){ st = 'Request due'; tone = 'warn';
+      why = 'Approved through '+fdate(ct)+'. The request was due '+fdate(due)+
+            (dueIn===0 ? ' — today.' : ' — '+plural(-dueIn,'day')+' ago.'); }
+    else if (isDischarging(a)){ st = 'Discharging'; tone = 'mute';
+      why = 'Expected out '+a.c.projDC+', before the next request would be due '+fdate(due)+
+            ' — nothing to submit unless the discharge slips.'; }
+    else { st = 'Covered'; tone = 'ok';
+      why = 'Approved through '+fdate(ct)+'. Next request due '+fdate(due)+'.'; }
+
+    var brief =
+        st==='Uncovered'            ? (!ct ? 'No authorization on file'
+                                      : pending ? 'Submitted '+fshort(a.req.submitted)+', undecided'
+                                      : a.req && a.req.decision==='Denied' ? 'Denied '+fshort(a.req.decidedOn)+', not challenged'
+                                      : 'Nothing submitted')
+      : st==='Pending past coverage'? 'Submitted '+fshort(a.req.submitted)+' · '+plural(waiting,'day')+' waiting'
+      : st==='Peer to peer'         ? 'Call '+fshort(a.req.p2p)+' '+a.req.p2pT
+      : st==='Appeal pending'       ? 'Filed '+fshort(a.req.appealed)
+      : st==='Denied — transition'  ? 'Denied '+fshort(a.req.decidedOn)+' · covered to '+fshort(ct)
+      : st==='Awaiting decision'    ? 'Submitted '+fshort(a.req.submitted)+' · '+plural(waiting,'day')
+      : st==='Request due'          ? (dueIn===0 ? 'Due today' : 'Due '+fshort(due)+' · '+plural(-dueIn,'day')+' ago')
+      : st==='Discharging'          ? 'Out '+a.c.projDC.slice(0,5)+' before due '+fshort(due)
+      :                               'Next due '+fshort(due);
+    return { st:st, tone:tone, why:why, brief:brief, uncovered:uncovered, apprGone:apprGone,
+             lapsedDays:lapsedDays, pending:pending, due:due, dueIn:dueIn, waiting:waiting, ct:ct };
+  }
+  /* the period this row is about: the request in flight, or the next one implied by coverage */
+  function nextPeriod(a){
+    if (a.req) return { start:a.req.start, end:a.req.end, units:a.req.units, proposed:false };
+    if (!a.coveredThrough) return { start:null, end:null, units:a.svc.span, proposed:true };
+    var st2 = addD(a.coveredThrough, 1);
+    return { start:st2, end:addD(st2, a.svc.span-1), units:a.svc.span, proposed:true };
+  }
+  function isDischarging(a){
+    var p = a.c.projDC.split('/'), dcd = new Date(+p[2], +p[0]-1, +p[1]);
+    var due = a.coveredThrough ? addD(a.coveredThrough, -DUE_OFFSET) : null;
+    return !!(due && dcd < due && !a.req);
+  }
+  var STATE_ORDER = ['Uncovered','Denied — transition','Pending past coverage','Peer to peer',
+                     'Appeal pending','Request due','Awaiting decision','Discharging','Covered'];
+  function sevOf(a){ return STATE_ORDER.indexOf(cov(a).st); }
+  function needsAction(a){ return cov(a).st !== 'Covered'; }
+
+  /* ---- QA. Only the checks that survive leaving the spreadsheet. ---- */
+  var QA_RULES = [
+    { id:'QA-A', l:'Service day outside coverage', r:'R-COVER',
+      f:function(a){ return uncoveredDays(a).length > 0; },
+      d:function(a){ var u = uncoveredDays(a);
+        return plural(u.length,'documented service day')+(u.length===1?' falls':' fall')+
+          ' outside every approved period — '+
+          fshort(u[0])+' through '+fshort(u[u.length-1])+'. These are the days that get written off.'; } },
+    { id:'QA-B', l:'Gap between approved periods', r:'R-COVER',
+      f:function(a){ return gaps(a).length > 0; },
+      d:function(a){ return gaps(a).map(function(g){
+        return plural(g.n,'day')+' uncovered between '+fshort(g.a)+' and '+fshort(g.b); }).join('; ')+
+        '. Nobody sees this on a spreadsheet — the rows look consecutive.'; } },
+    { id:'QA-C', l:'Overlapping approved periods', r:'R-COVER',
+      f:function(a){ return overlaps(a).length > 0; },
+      d:function(a){ return 'Two approved periods cover the same dates. Usually a resubmission that '+
+        'was approved twice; the units are counted twice with it.'; } }
+  ];
+  function uncoveredDays(a){
+    return a.days.filter(function(d){
+      return !a.periods.some(function(p){ return d >= p.start && d <= p.end; });
+    });
+  }
+  function gaps(a){
+    var out = [];
+    for (var i=1;i<a.periods.length;i++){
+      var n = dd(a.periods[i].start, a.periods[i-1].end) - 1;
+      if (n > 0) out.push({ n:n, a:a.periods[i-1].end, b:a.periods[i].start });
+    }
+    return out;
+  }
+  function overlaps(a){
+    var out = [];
+    for (var i=1;i<a.periods.length;i++)
+      if (a.periods[i].start <= a.periods[i-1].end) out.push(i);
+    return out;
+  }
+  function qaFlags(a){ return QA_RULES.filter(function(q){ return q.f(a); }); }
+
+  /* ---- filtering ---- */
+  function authScope(list){
+    return list.filter(function(a){
+      if (state.aFac !== 'all' && a.fac !== state.aFac) return false;
+      if (state.aProg === 'php' && a.svcId !== 'php') return false;
+      if (state.aProg === 'iop' && a.svcId !== 'iop') return false;
+      if (state.aProg === 'peer' && a.svcId.indexOf('peer') !== 0) return false;
+      if (state.aOwner === 'mine' && a.counselor !== ME) return false;
+      if (state.aq){
+        var s = (name(a.c)+' '+a.c.mrn+' '+a.id).toLowerCase();
+        if (s.indexOf(state.aq.toLowerCase()) < 0) return false;
+      }
+      return true;
+    });
+  }
+  function bySev(x,y){
+    return sevOf(x)-sevOf(y) || ((cov(x).due||TODAY) - (cov(y).due||TODAY));
+  }
+  function allRows(){ return authScope(auths).sort(bySev); }
+  function actionRows(){ return allRows().filter(needsAction); }
+  function uncoveredRows(){ return allRows().filter(function(a){ return cov(a).uncovered; }); }
+  function qaRows(){ return allRows().filter(function(a){ return qaFlags(a).length; }); }
+  var IN_FLIGHT = ['Awaiting decision','Pending past coverage','Peer to peer','Appeal pending'];
+  function inFlightRows(){ return allRows().filter(function(a){
+    return IN_FLIGHT.indexOf(cov(a).st) > -1; }); }
+  /* discharged clients keep their unresolved authorizations — K-22 */
+  function archiveRows(){ return authScope(discharged.map(function(c){
+    return archOf(c); }).filter(Boolean)).sort(bySev); }
+
+  /* ---- tiles ---- */
+  function tile(l,v,cls,extra,sub){
+    return '<div class="dtile '+(cls||'')+'"'+(extra||'')+'><div class="v mono">'+v+
+      '</div><div class="l">'+l+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')+'</div>';
+  }
+  function tiles(){
+    var A = allRows(), n = function(s){ return A.filter(function(a){ return cov(a).st===s; }).length; };
+    var unc = A.filter(function(a){ return cov(a).uncovered; });
+    var dayssum = unc.reduce(function(s,a){ return s + (cov(a).lapsedDays||0); }, 0);
+    return '<div class="dtiles">' +
+      tile('Uncovered today', unc.length, 'bad', ' data-jump="Uncovered"',
+           dayssum ? plural(dayssum,'client-day')+' with nothing in flight' : 'nothing in flight') +
+      tile('Pending past coverage', n('Pending past coverage'), 'warn',
+           ' data-jump="Pending past coverage"', 'outcome unsettled') +
+      tile('Request due', n('Request due'), 'warn', ' data-jump="Request due"', 'today or past') +
+      tile('Awaiting decision', n('Awaiting decision'), '', ' data-jump="Awaiting decision"',
+           A.filter(function(a){ return cov(a).waiting > 3; }).length + ' over 3 days') +
+      tile('Denied — transition', n('Denied — transition'), 'bad', ' data-jump="Denied — transition"',
+           'level of care change') +
+      tile('Peer to peer', n('Peer to peer'), 'warn', ' data-jump="Peer to peer"', 'scheduled') +
+      tile('Appeals', n('Appeal pending'), 'warn', ' data-jump="Appeal pending"', 'filed') +
+      tile('Discharging', n('Discharging'), '', ' data-jump="Discharging"', 'out before next due') +
+      tile('Covered', n('Covered'), 'good', ' data-jump="Covered"', 'nothing to do') +
+      '</div>';
+  }
+
+  /* ---- board ---- */
+  function authView(){
+    if (state.aRec) return authRecView();
+    var h = tiles();
+
+    var rows = state.asub==='all' ? allRows()
+             : state.asub==='uncov' ? uncoveredRows()
+             : state.asub==='flight' ? inFlightRows()
+             : state.asub==='arch' ? archiveRows()
+             : state.asub==='qa' ? qaRows()
+             : actionRows();
+    if (state.aJump) rows = allRows().filter(function(a){ return cov(a).st===state.aJump; });
+
+    h += '<div class="card"><h2>' +
+      (state.aJump ? state.aJump
+       : state.asub==='all' ? 'All coverage'
+       : state.asub==='uncov' ? 'Uncovered — approved coverage ended, nothing in flight'
+       : state.asub==='flight' ? 'In flight — with the payer'
+       : state.asub==='arch' ? 'Archive — discharged, authorization unresolved'
+       : state.asub==='qa' ? 'Coverage errors' : 'Needs action') +
+      '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+      '<span class="seg">' + ['act|Needs action','uncov|Uncovered','flight|In flight',
+                              'all|All coverage','arch|Archive','qa|Coverage errors']
+        .map(function(x){ var p=x.split('|');
+          var badge = p[0]==='uncov' ? uncoveredRows().length
+                    : p[0]==='flight' ? inFlightRows().length
+                    : p[0]==='arch' ? archiveRows().length
+                    : p[0]==='qa' ? qaRows().length : null;
+          return '<button type="button" data-asub="'+p[0]+'" aria-pressed="'+
+            (state.asub===p[0] && !state.aJump)+'">'+p[1]+
+            (badge ? ' <b class="mono">'+badge+'</b>' : '')+'</button>'; }).join('') + '</span>' +
+      '<span class="seg">' + ['all|All','php|PHP','iop|IOP','peer|Peer'].map(function(x){
+          var p=x.split('|');
+          return '<button type="button" data-aprog="'+p[0]+'" aria-pressed="'+(state.aProg===p[0])+
+            '">'+p[1]+'</button>'; }).join('') + '</span>' +
+      '<span class="seg"><button type="button" data-aowner="all" aria-pressed="'+(state.aOwner==='all')+
+        '">Everyone</button><button type="button" data-aowner="mine" aria-pressed="'+
+        (state.aOwner==='mine')+'">Mine</button></span>' +
+      '<span class="seg"><button type="button" data-acols="lean" aria-pressed="'+(state.aCols==='lean')+
+        '">Key columns</button><button type="button" data-acols="full" aria-pressed="'+
+        (state.aCols==='full')+'">All columns</button></span>' +
+      '</span></h2>';
+
+    h += '<div class="body" style="border-bottom:1px solid var(--line);padding:10px 16px;display:flex;' +
+      'gap:14px;flex-wrap:wrap;align-items:center">' +
+      '<label class="sub">Facility <select data-afac="1"><option value="all">All facilities</option>' +
+        FACILITIES.map(function(f){ return '<option value="'+f.id+'"'+(state.aFac===f.id?' selected':'')+
+          '>'+f.n+'</option>'; }).join('') + '</select></label>' +
+      '<label class="sub">Request due <select data-aoff="1">' +
+        [1,2,3,4,5,6,7].map(function(d){ return '<option'+(d===DUE_OFFSET?' selected':'')+'>'+d+'</option>'; }).join('') +
+        '</select> days before coverage ends '+ruleTag('R-DUE')+'</label>' +
+      '<input type="text" id="aq" placeholder="Client or MRN" value="'+state.aq+
+        '" style="font-family:inherit;font-size:12.5px;padding:5px 9px;border:1px solid var(--line-strong);' +
+        'border-radius:4px;background:var(--surface);color:var(--ink);min-width:180px">' +
+      '<label class="sub">A pending request <select data-apend="1">' +
+        '<option value="1"'+(PEND_COVERS?' selected':'')+'>holds coverage</option>' +
+        '<option value="0"'+(PEND_COVERS?'':' selected')+'>does not hold coverage</option>' +
+        '</select> '+ruleTag('R-PEND')+'</label>' +
+      (state.aJump ? '<button class="rolebtn" style="margin:0" data-ajump="">clear</button>' : '') +
+      '<span class="sub" style="margin-left:auto">F-12 — facility-scoped.</span></div>';
+
+    var full = state.aCols==='full';
+    h += '<div class="tw" style="border:0;box-shadow:none"><table class="authtbl"><thead><tr>' +
+      '<th style="min-width:150px">State</th>' +
+      (state.asub==='qa' ? '<th style="min-width:250px">What is wrong</th>' : '<th style="min-width:180px">Why</th>') +
+      '<th>Client</th>' + (full?'<th>DOB</th><th>Ins ID</th><th>Counselor</th>':'') +
+      '<th>Service</th>' + (full?'<th>Prev auth #</th>':'') +
+      '<th>Last covered</th><th>Start</th><th>End</th><th>Units</th><th>Request due</th>' +
+      (full?'<th>Submitted</th><th>Follow-up</th><th>MCO</th><th>Admit</th><th>Proj D/C</th>' +
+            '<th>Days in tx</th>':'') +
+      '<th>Owner</th></tr></thead><tbody>';
+
+    if (!rows.length) h += '<tr><td colspan="14" class="sub" style="padding:26px;text-align:center">' +
+      (state.asub==='qa' ? 'No coverage errors with these filters.'
+       : state.asub==='uncov' ? 'Nobody is uncovered right now.'
+       : state.asub==='arch' ? 'No discharged client has an unresolved authorization.'
+       : state.asub==='flight' ? 'Nothing is with a payer right now.'
+       : 'Nothing needs action with these filters.')+'</td></tr>';
+
+    rows.forEach(function(a){
+      var k = cov(a), q = qaFlags(a), np = nextPeriod(a),
+          dit = a.c.transfer ? dd(TODAY, a.c.transfer.d) : a.c.los;
+      h += '<tr class="'+(k.uncovered?'lt-uncov':k.tone==='warn'?'lt-warn':'')+'" data-arec="'+a.id+'">' +
+        '<td><span class="stchip '+k.tone+'">'+k.st+'</span>' +
+          (k.apprGone && k.lapsedDays ? '<br><span class="tag '+(k.uncovered?'bad':'warn')+'">'+
+            plural(k.lapsedDays,'day')+' past</span>' : '')+'</td>' +
+        (state.asub==='qa'
+          ? '<td>'+q.map(function(x){ return '<div style="margin-bottom:4px"><span class="tag bad">'+
+              x.l+'</span> '+ruleTag(x.r)+'<br><span class="sub">'+x.d(a)+'</span></div>'; }).join('')+'</td>'
+          : '<td class="sub">'+k.brief+'</td>') +
+        '<td class="nm">'+name(a.c)+'<br><span class="sub mono">'+a.c.mrn+'</span></td>' +
+        (full?'<td class="mono sub">'+a.c.dob+'</td><td class="mono sub">'+a.c.insId+'</td>' +
+              '<td class="sub">'+a.counselor+'</td>':'') +
+        '<td>'+a.svc.n+'<br><span class="sub mono">'+a.svc.code+'</span></td>' +
+        (full?'<td class="mono sub">'+(a.prevAuth||'—')+'</td>':'') +
+        '<td class="mono">'+(k.ct ? fshort(k.ct) : '<span class="tag bad">none</span>')+'</td>' +
+        '<td class="mono'+(np.proposed?' sub':'')+'">'+fshort(np.start)+'</td>' +
+        '<td class="mono'+(np.proposed?' sub':'')+'">'+fshort(np.end)+
+          (np.proposed?'<br><span class="sub">proposed</span>':'')+'</td>' +
+        '<td class="mono">'+np.units+'</td>' +
+        '<td class="mono">'+(!k.due ? '<span class="sub">—</span>'
+            : (a.req && !a.req.decision) ? '<span class="sub">'+fshort(k.due)+' · met</span>'
+            : k.dueIn<0 ? '<span class="tag bad">'+fshort(k.due)+'</span>'
+            : k.dueIn===0 ? '<span class="tag warn">today</span>'
+            : fshort(k.due))+'</td>' +
+        (full?'<td class="mono sub">'+(a.req?fshort(a.req.submitted):'—')+'</td>' +
+              '<td>'+(a.followup?'<span class="tag ok">yes</span>':'<span class="tag mute">no</span>')+'</td>' +
+              '<td class="sub">'+a.mco+'</td><td class="mono sub">'+a.c.admit+'</td>' +
+              '<td class="mono sub">'+a.c.projDC+'</td>' +
+              '<td class="mono">'+dit+(a.c.transfer?'<br><span class="sub">since 2.1</span>':'')+'</td>':'') +
+        '<td>'+(a.owner ? '<span class="sub">'+a.owner+'</span>'
+          : '<button class="rolebtn" style="margin:0" data-aassign="'+a.id+'">assign</button>')+'</td>' +
+        '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    h += '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      (state.asub==='qa'
+        ? 'Three checks, not the spreadsheet’s five. QA-1, QA-3, QA-4 and QA-5 all caught ' +
+          '<i>transcription</i> errors — a blank due date, a start date typed before the last covered ' +
+          'date, a due date that did not match the formula. None of them can happen here, because ' +
+          'none of those values are typed. What is left checks reality: service days that fall ' +
+          'outside coverage, gaps between approved periods, and periods that overlap.'
+        : 'There are no "Upcoming" rows. Coverage runs to a date; the request becomes due ' +
+          DUE_OFFSET+' days before that date, whether the last request was approved or is still ' +
+          'pending, and appears here on its own. Nothing to create, nothing to forget to create. ' +
+          '<b>Uncovered</b> means approved coverage has ended and nothing is in flight. Whether a ' +
+          'pending request holds coverage in the meantime is <b>not</b> something this product ' +
+          'decides — it is the toggle above, and the honest answer depends on the payer and on ' +
+          'whether the request was timely. '+ruleTag('R-PEND')) +
+      '</p></div></div>';
+    return h;
+  }
+
+  /* ---- one coverage record ---- */
+  function authRecView(){
+    var a = auths.filter(function(x){ return x.id===state.aRec; })[0];
+    if (!a) { state.aRec = null; return authView(); }
+    var k = cov(a), q = qaFlags(a);
+    var fac = FACILITIES.filter(function(x){ return x.id===a.fac; })[0];
+
+    var h = '<div class="card"><h2>'+name(a.c)+' — '+a.svc.n +
+      '<span style="display:flex;gap:8px;align-items:center">' +
+      '<span class="stchip '+k.tone+'">'+k.st+'</span>' +
+      '<button type="button" class="combtog" data-aback="1" style="font-size:11.5px;padding:5px 11px">' +
+      '&larr; back</button></span></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px">' +
+      '<span class="sub"><span class="mono">'+a.c.mrn+'</span> · '+a.c.dob+' · '+a.mco+
+      ' · ID <span class="mono">'+a.c.insId+'</span> · '+fac.n+' · '+a.counselor+'</span></div>';
+
+    h += '<div class="body" style="border-bottom:1px solid var(--line);padding:9px 16px;' +
+      'background:var(--accent-soft)"><span class="sub">Same record as the <b>Authorizations</b> tab ' +
+      'on '+name(a.c)+'’s chart — one record, two views. <a href="#chart">Open in the chart &rarr;</a>' +
+      '</span></div>';
+
+    h += '<div class="flagrow '+(k.tone==='ok'?'':k.tone==='bad'?'bad':'warn')+'">' +
+      '<div><span class="tag '+k.tone+'">'+k.st+'</span></div><div class="sub">'+k.why+'</div></div>';
+    q.forEach(function(x){
+      h += '<div class="flagrow bad"><div><span class="tag bad">'+x.l+'</span> '+ruleTag(x.r)+
+        '</div><div class="sub">'+x.d(a)+'</div></div>';
+    });
+
+    /* timeline: approved periods, the request in flight, and today */
+    h += '<div class="card" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0">' +
+      '<h2>Coverage timeline '+ruleTag('R-COVER')+'</h2><div class="body">' + timeline(a) + '</div></div>';
+
+    h += '<div class="body" style="border-top:1px solid var(--line)"><div class="authgrid">' +
+      '<div><div class="k">Covered through</div><div class="mono big">'+fdate(k.ct)+'</div>' +
+        '<div class="sub">'+(k.apprGone
+          ? '<b>'+plural(k.lapsedDays||0,'day')+' past the approved end</b>'+
+            (k.pending ? ', with a request undecided '+ruleTag('R-PEND') : '')
+          : plural(dd(k.ct,TODAY),'day')+' of approved coverage left')+'</div></div>' +
+      '<div><div class="k">Request due</div><div class="mono big">'+fdate(k.due)+'</div>' +
+        '<div class="sub">'+DUE_OFFSET+' days before coverage ends '+ruleTag('R-DUE')+'</div></div>' +
+      '<div><div class="k">DMAS window</div><div class="mono big">'+
+        (k.ct ? fshort(addD(k.ct,-5))+' – '+fshort(k.ct) : '—')+'</div>' +
+        '<div class="sub">Regulatory outer bound '+
+        ruleTag(a.mco.indexOf('FFS')>-1?'R-EXT-FFS':'R-EXT-MCO')+'</div></div>' +
+      '<div><div class="k">Documented service days</div><div class="mono big">'+a.days.length+'</div>' +
+        '<div class="sub">'+(uncoveredDays(a).length
+          ? '<b>'+uncoveredDays(a).length+' outside coverage</b> '+ruleTag('R-COVER')
+          : 'all inside approved periods')+'</div></div>' +
+      '<div><div class="k">Days in treatment</div><div class="mono big">'+
+        (a.c.transfer ? dd(TODAY,a.c.transfer.d) : a.c.los)+'</div>' +
+        '<div class="sub">'+(a.c.transfer
+          ? 'Reset at the '+a.c.transfer.from+' → '+a.c.transfer.to+' transfer '+fdate(a.c.transfer.d)+
+            ' · '+a.c.los+' in episode '+ruleTag('R-DIT')
+          : 'Admitted '+a.c.admit+' '+ruleTag('R-DIT'))+'</div></div>' +
+      '<div><div class="k">Owner</div><div class="big">'+(a.owner||'<span class="sub">Unassigned</span>')+
+        '</div><div style="margin-top:4px"><select data-aown="'+a.id+'">' +
+        '<option value="">— unassigned —</option>' +
+        AUTH_OWNERS.map(function(o){ return '<option'+(a.owner===o?' selected':'')+'>'+o+'</option>'; }).join('') +
+        '</select></div></div>' +
+      '</div></div>';
+
+    if (a.req && a.req.p2p){
+      h += '<div class="card" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0">' +
+        '<h2>Peer to peer <span class="n">'+fdate(a.req.p2p)+' '+a.req.p2pT+'</span></h2><div class="body">' +
+        '<textarea class="p2pbox" data-p2p="'+a.id+'" placeholder="What was discussed, who attended, ' +
+        'what was decided…">'+(a.p2pNote||'')+'</textarea>' +
+        '<p class="demonote" style="margin-top:8px">Free text on the record, tied to whatever gets ' +
+        'uploaded. The scheduled time shows on the board so it reads straight off in morning meeting.' +
+        '</p></div></div>';
+    }
+
+    h += '<div class="card" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0">' +
+      '<h2>Requests and decisions</h2><div class="tw" style="border:0;box-shadow:none"><table>' +
+      '<thead><tr><th>Period</th><th>Units</th><th>Outcome</th><th>Auth #</th></tr></thead><tbody>' +
+      a.periods.map(function(p){
+        return '<tr><td class="mono">'+fdate(p.start)+' – '+fdate(p.end)+'</td>' +
+          '<td class="mono">'+p.units+'</td><td><span class="tag ok">Approved</span></td>' +
+          '<td class="mono sub">'+p.num+'</td></tr>'; }).join('') +
+      (a.req ? '<tr><td class="mono">'+fdate(a.req.start)+' – '+fdate(a.req.end)+'</td>' +
+        '<td class="mono">'+a.req.units+'</td><td>'+
+        (a.req.decision==='Denied' ? '<span class="tag bad">Denied '+fdate(a.req.decidedOn)+'</span>'
+         : '<span class="tag warn">Submitted '+fdate(a.req.submitted)+'</span>')+'</td>' +
+        '<td class="sub">—</td></tr>' : '') +
+      (!a.periods.length && !a.req ? '<tr><td colspan="4" class="sub" style="padding:18px">' +
+        'Nothing requested yet.</td></tr>' : '') +
+      '</tbody></table></div></div>';
+
+    if (a.corr.length){
+      h += '<div class="card" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0">' +
+        '<h2>Correspondence <span class="n">'+a.corr.length+'</span></h2>' +
+        '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr><th>Date</th><th>Event</th>' +
+        '<th>Who</th></tr></thead><tbody>' + a.corr.map(function(x){
+          return '<tr><td class="mono">'+fdate(x.d)+'</td><td class="nm">'+x.what+'</td>' +
+            '<td class="sub">'+x.who+'</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    }
+
+    h += '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      'The record is coverage plus the requests that produced it. "Days in treatment", the request ' +
+      'due date, and the state at the top are all computed — none of them is a field anyone fills in.' +
+      '</p></div></div>';
+    return h;
+  }
+
+  function timeline(a){
+    var all = a.periods.slice();
+    if (a.req) all.push({ start:a.req.start, end:a.req.end, pending:!a.req.decision,
+      denied:a.req.decision==='Denied' });
+    if (!all.length) return '<p class="sub" style="margin:0">No authorization periods yet.</p>';
+    var lo = all[0].start, hi = all[all.length-1].end;
+    if (TODAY < lo) lo = TODAY; if (TODAY > hi) hi = TODAY;
+    var span = Math.max(1, dd(hi, lo));
+    var pos = function(d){ return dd(d, lo)/span*100; };
+
+    var h = '<div class="tline">';
+    all.forEach(function(p){
+      var cls = p.denied ? 'no' : p.pending ? 'pend' : 'ok';
+      h += '<div class="tseg '+cls+'" style="left:'+pos(p.start)+'%;width:'+
+        (Math.max(1,dd(p.end,p.start))/span*100)+'%">' +
+        (p.denied?'Denied':p.pending?'Pending':'Approved')+'</div>';
+    });
+    /* uncovered stretch between covered-through and today */
+    if (a.coveredThrough && TODAY > a.coveredThrough){
+      h += '<div class="tgap" style="left:'+pos(a.coveredThrough)+'%;width:'+
+        (dd(TODAY,a.coveredThrough)/span*100)+'%" title="uncovered"></div>';
+    }
+    a.days.forEach(function(d){
+      var bad = !a.periods.some(function(p){ return d>=p.start && d<=p.end; });
+      h += '<div class="tday'+(bad?' bad':'')+'" style="left:'+pos(d)+'%"></div>';
+    });
+    h += '<div class="tnow" style="left:'+pos(TODAY)+'%"><span>today</span></div></div>';
+    h += '<div class="tkey"><span><i class="ok"></i>Approved</span><span><i class="pend"></i>Pending</span>' +
+      '<span><i class="no"></i>Denied</span><span><i class="gap"></i>Uncovered</span>' +
+      '<span><i class="day"></i>Documented service day</span>' +
+      '<span><i class="dayb"></i>Service day outside coverage</span></div>';
+    return h;
+  }
+
+  function rulePanel(){
+    var r = AUTH_RULES[state.aRule];
+    return '<div class="rulemodal"><div class="rulebox">' +
+      '<div class="rh"><b>'+state.aRule+'</b> <span class="tag '+(r.warn?'warn':'info')+'">'+r.layer+'</span>' +
+      '<button type="button" class="combtog" data-ruleclose="1">close</button></div>' +
+      '<div class="rb"><div class="nm">'+r.label+'</div><p>'+r.text+'</p>' +
+      '<div class="sub"><b>Source:</b> '+r.src+'</div>' +
+      '<p class="demonote" style="margin-top:10px">Rules compose in layers — DMAS, payer contract, ' +
+      'agency policy, clinical, product — and the most restrictive wins. Anything marked <b>Agency ' +
+      'policy</b> is yours to change without a release.</p></div></div></div>';
+  }
+  function statusPanel(){ return ''; }
+
+  /* ---------- disclosure recipient directory ----------
+     One record per organization we send records to. Presets and individual releases
+     POINT at a record; they never copy it. Change a fax number once. */
+  var RECIP = [
+    { id:'D-01', t:'Hospital', org:'VCU Medical Center', attn:'Health Information Management',
+      addr:'1250 E Marshall St', city:'Richmond', st:'VA', zip:'23298',
+      phone:'(804) 555-0140', fax:'(804) 555-0141', email:'roi@vcuhealth.example',
+      a:true, pre:['VCU Medical Center'], roi:23 },
+    { id:'D-02', t:'Hospital', org:'Richmond Community Hospital', attn:'Medical Records',
+      addr:'1500 N 28th St', city:'Richmond', st:'VA', zip:'23223',
+      phone:'(804) 555-0188', fax:'(804) 555-0189', email:'records@rch.example',
+      a:true, pre:['Richmond Community Hospital'], roi:11 },
+    { id:'D-03', t:'Hospital', org:'Chippenham Hospital', attn:'Release of Information',
+      addr:'7101 Jahnke Rd', city:'Richmond', st:'VA', zip:'23225',
+      phone:'(804) 555-0122', fax:'(804) 555-0123', email:'him@chippenham.example',
+      a:true, pre:[], roi:8 },
+    { id:'D-04', t:'Primary care', org:'Southside Primary Care', attn:'',
+      addr:'4600 Hull Street Rd', city:'Richmond', st:'VA', zip:'23224',
+      phone:'(804) 555-0166', fax:'(804) 555-0167', email:'front@southsidepc.example',
+      a:true, pre:[], roi:14 },
+    { id:'D-05', t:'FQHC', org:'Daily Planet Health Services', attn:'',
+      addr:'517 W Grace St', city:'Richmond', st:'VA', zip:'23220',
+      phone:'(804) 555-0104', fax:'(804) 555-0105', email:'referrals@dailyplanet.example',
+      a:true, pre:[], roi:6 },
+    { id:'D-06', t:'Legal / court', org:'Richmond City Probation & Parole — District 1', attn:'',
+      addr:'701 E Franklin St', city:'Richmond', st:'VA', zip:'23219',
+      phone:'(804) 555-0190', fax:'(804) 555-0191', email:'district1@vadoc.example',
+      a:true, pre:[], roi:19 },
+    { id:'D-07', t:'Legal / court', org:'Henrico County Drug Court', attn:'',
+      addr:'4301 E Parham Rd', city:'Henrico', st:'VA', zip:'23228',
+      phone:'(804) 555-0177', fax:'(804) 555-0178', email:'drugcourt@henrico.example',
+      a:true, pre:[], roi:7 },
+    { id:'D-08', t:'Treatment provider', org:'Rubicon Residential', attn:'Admissions',
+      addr:'1300 McDonough St', city:'Richmond', st:'VA', zip:'23224',
+      phone:'(804) 555-0150', fax:'(804) 555-0151', email:'admissions@rubicon.example',
+      a:true, pre:[], roi:5 },
+    { id:'D-09', t:'Lab', org:'Averhealth', attn:'',
+      addr:'2340 Dabney Rd', city:'Richmond', st:'VA', zip:'23230',
+      phone:'(804) 555-0111', fax:'(804) 555-0112', email:'results@averhealth.example',
+      a:false, pre:[], roi:3 }
+  ];
+  var RFIELDS = [
+    ['t','Type'], ['org','Organization'], ['attn','Attention / department'],
+    ['addr','Address'], ['city','City'], ['st','State'], ['zip','Zip'],
+    ['phone','Phone'], ['fax','Fax'], ['email','E-Mail']
+  ];
+  function recip(id){ return RECIP.filter(function(r){ return r.id===id; })[0]; }
+
+  function dirUseView(){
+    var r = recip(state.duse);
+    var n = Math.min(r.roi, 30);
+    return '<div class="card"><h2>' + r.org + ' — who has a release' +
+      '<button type="button" class="combtog" data-drec="'+r.id+'" style="font-size:11.5px;padding:5px 11px">' +
+      '&larr; back to record</button></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px"><span class="sub">' +
+      '<b class="mono">'+r.roi+'</b> signed release'+(r.roi===1?'':'s')+' name <span class="mono">'+r.id+
+      '</span> as the recipient' + (r.pre.length ? ', plus <b>'+r.pre.length+'</b> ROI preset' +
+      (r.pre.length>1?'s':'') : '') + '. ' +
+      (r.roi>30?'Showing the first 30. ':'') +
+      'This is the question you cannot answer today: <i>who did we send records to, and is it still current?</i>' +
+      '</span></div>' +
+      (r.pre.length ? '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+        '<th>ROI preset</th><th>Reference</th><th></th></tr></thead><tbody>' +
+        r.pre.map(function(p){
+          return '<tr><td class="nm">'+p+'</td><td class="mono sub">'+r.id+
+            '</td><td class="sub">Open in Forms &rarr;</td></tr>'; }).join('') +
+        '</tbody></table></div>' : '') +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Client</th><th>Signed</th><th>Expires</th><th>Status</th><th></th></tr></thead><tbody>' +
+      Array.apply(null,{length:n}).map(function(_,i){
+        var exp = i % 7 === 3;
+        return '<tr><td class="nm">MRN 004'+(600+i*13)+'</td>' +
+          '<td class="mono">0'+(1+i%9)+'/'+(2+i%26)+'/'+(exp?'2025':'2026')+'</td>' +
+          '<td class="mono">0'+(1+i%9)+'/'+(2+i%26)+'/'+(exp?'2026':'2027')+'</td>' +
+          '<td>'+(exp?'<span class="tag mute">Expired</span>':'<span class="tag ok">Active</span>')+'</td>' +
+          '<td class="sub">Open chart &rarr;</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+
+  function dirRecView(){
+    var r = recip(state.drec);
+    return '<div class="card"><h2>' + (r.org || 'New recipient') +
+      '<span style="display:flex;gap:8px;align-items:center">' +
+      (r.a ? '<span class="tag ok">Active</span>' : '<span class="tag mute">Retired</span>') +
+      '<button type="button" class="combtog" data-dir="open" style="font-size:11.5px;padding:5px 11px">' +
+      '&larr; all recipients</button></span></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px">' +
+      '<span class="sub"><b>Referenced by:</b> ' +
+      (r.roi ? '<button class="rolebtn" style="margin:0" data-duse="'+r.id+'">'+r.roi+
+        ' signed release'+(r.roi===1?'':'s')+'</button>' : 'no releases yet') +
+      (r.pre.length ? ' · '+r.pre.length+' ROI preset'+(r.pre.length>1?'s':'') : '') +
+      ' · <span class="mono">'+r.id+'</span></span></div>' +
+      '<div class="body"><div class="dfields">' +
+      RFIELDS.map(function(f){
+        return '<label class="df"><span class="k">'+f[1]+'</span>' +
+          '<input type="text" data-dset="'+r.id+'|'+f[0]+'" value="'+(r[f[0]]||'')+'"></label>';
+      }).join('') + '</div>' +
+      '<div class="actions" style="margin-top:14px">' +
+      '<button class="rolebtn" style="margin:0" data-dtoggle="'+r.id+'">' +
+      (r.a ? 'Retire this recipient' : 'Reinstate') + '</button></div>' +
+      '<p class="demonote" style="margin-top:12px">Every release that named this organization points ' +
+      'at <span class="mono">'+r.id+'</span>, not at a copy of the address. Correct the fax here and ' +
+      'the next release &mdash; and every preset built on this record &mdash; is right. ' +
+      'Retiring keeps the '+r.roi+' existing release'+(r.roi===1?'':'s')+
+      ' intact and stops the name appearing when someone starts a new one.</p>' +
+      '</div></div>';
+  }
+
+  function dirListView(){
+    var act = RECIP.filter(function(r){ return r.a; }).length;
+    return '<div class="card"><h2>Disclosure recipients' +
+      '<span style="display:flex;gap:8px;align-items:center">' +
+      '<button type="button" class="rolebtn" style="margin:0" data-dadd="1">+ add recipient</button>' +
+      '<button type="button" class="combtog" data-dir="" style="font-size:11.5px;padding:5px 11px">' +
+      '&larr; all lists</button></span></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px">' +
+      '<span class="sub"><b>Used by:</b> Releases of information &middot; ROI presets &middot; ' +
+      'Referral packets &middot; Records-request log &nbsp;&middot;&nbsp; <b class="mono">'+act+
+      '</b> active of '+RECIP.length+'</span></div>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Type</th><th>Organization</th><th>City</th><th>Phone</th><th>Fax</th>' +
+      '<th>Releases on file</th><th>Status</th></tr></thead><tbody>' +
+      RECIP.map(function(r){
+        return '<tr'+(r.a?'':' style="opacity:.55"')+' data-drec="'+r.id+'">' +
+          '<td class="sub">'+r.t+'</td>' +
+          '<td class="nm">'+r.org+(r.pre.length?' <span class="tag info">preset</span>':'')+'</td>' +
+          '<td class="sub">'+r.city+'</td>' +
+          '<td class="mono sub">'+r.phone+'</td><td class="mono sub">'+r.fax+'</td>' +
+          '<td class="mono">'+(r.roi||'<span class="sub">&mdash;</span>')+'</td>' +
+          '<td>'+(r.a?'<span class="tag ok">Active</span>':'<span class="tag mute">Retired</span>')+
+          '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      'This holds <b>organizations</b> &mdash; the places records go, over and over. A named person ' +
+      'who belongs to one client (a mother, a sponsor, an emergency contact) is typed on that ' +
+      'client\'s release and lives in their chart, not in an agency-wide list. A person in an ' +
+      '<i>organizational</i> role &mdash; a probation officer, a discharge planner &mdash; is the ' +
+      'attention line here, or the Name field on the release. The office is durable; the officer ' +
+      'assigned to a case is not.</p></div></div>';
+  }
+
+  function configView(){
+    if (state.duse) return dirUseView();
+    if (state.drec) return dirRecView();
+    if (state.dir) return dirListView();
+    if (state.usage) return usageView();
+    if (state.list){
+      var L = vlist(state.list);
+      return '<div class="card"><h2>' + L.n +
+        '<span style="display:flex;gap:8px;align-items:center">' +
+        '<span class="tag '+(L.own==='system'?'mute':'info')+'">'+L.own+'</span>' +
+        '<button type="button" class="combtog" data-list="" style="font-size:11.5px;padding:5px 11px">' +
+        '← all lists</button></span></h2>' +
+        '<div class="body" style="border-bottom:1px solid var(--line);padding:11px 16px">' +
+        '<span class="sub"><b>Used by:</b> '+L.used.join(' · ')+'</span></div>' +
+        '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+        '<th>ID</th><th>Label</th><th>Status</th><th>Records using it</th><th></th>' +
+        '</tr></thead><tbody>' +
+        L.e.map(function(en,i){
+          return '<tr'+(en.a?'':' style="opacity:.5"')+'><td class="mono sub">'+en.id+'</td>' +
+            '<td class="nm">'+en.l+'</td>' +
+            '<td>'+(en.a?'<span class="tag ok">Active</span>':'<span class="tag mute">Retired</span>')+'</td>' +
+            '<td>'+(en.u ? '<button class="rolebtn" style="margin:0" data-usage="'+L.id+'|'+i+
+              '">'+en.u+' records</button>' : '<span class="sub">—</span>')+'</td>' +
+            '<td>'+(L.own==='system' ? '<span class="sub">managed centrally</span>'
+              : '<button class="rolebtn" style="margin:0" data-vtoggle="'+L.id+'|'+i+'">'+
+                (en.a?'retire':'reinstate')+'</button>')+'</td></tr>';
+        }).join('') +
+        (L.own==='tenant' ? '<tr><td></td><td colspan="4">' +
+          (state.addTo===L.id
+            ? '<input type="text" class="noteinput" style="max-width:320px" data-vadd="'+L.id+
+              '" placeholder="New value — press Enter">'
+            : '<button class="rolebtn" style="margin:0" data-vaddbtn="'+L.id+'">+ add value</button>') +
+          '</td></tr>' : '') +
+        '</tbody></table></div>' +
+        '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+        'Values are <b>retired, never deleted</b> — records already pointing at one keep resolving, ' +
+        'and the value stops appearing in new pickers. Labels can be renamed without breaking anything ' +
+        'because references bind to the ID, not the text.</p></div></div>';
+    }
+
+    return '<div class="card"><h2>Value lists<span class="sub" style="text-transform:none;' +
+      'letter-spacing:0;font-weight:400">Define a list once; every form, field, and rule that uses ' +
+      'it updates together</span></h2>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>List</th><th>Owner</th><th>Scope</th><th>Values</th><th>Used by</th>' +
+      '</tr></thead><tbody>' +
+      VLISTS.map(function(L){
+        var act = L.e.filter(function(x){ return x.a; }).length;
+        return '<tr data-list="'+L.id+'"><td class="nm">'+L.n+'</td>' +
+          '<td><span class="tag '+(L.own==='system'?'mute':'info')+'">'+L.own+'</span></td>' +
+          '<td class="sub">'+L.scope+'</td>' +
+          '<td class="mono">'+act+(act<L.e.length?' <span class="sub">+'+(L.e.length-act)+' retired</span>':'')+'</td>' +
+          '<td class="sub">'+L.used.join(' · ')+'</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      'Tenant lists are yours to edit. System lists — levels of care, payers — are managed centrally ' +
+      'because rules compose against them. Editing <b>Session leads &amp; facilitators</b> changes the ' +
+      'dropdowns on the Schedule immediately; that is the whole point of a shared list.</p></div></div>' +
+
+      '<div class="card"><h2>Directories<span class="sub" style="text-transform:none;' +
+      'letter-spacing:0;font-weight:400">Records with fields, not just labels — referenced by ID ' +
+      'everywhere they appear</span></h2>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Directory</th><th>Owner</th><th>Scope</th><th>Records</th><th>Used by</th>' +
+      '</tr></thead><tbody>' +
+      '<tr data-dir="open"><td class="nm">Disclosure recipients</td>' +
+      '<td><span class="tag info">tenant</span></td><td class="sub">Agency</td>' +
+      '<td class="mono">'+RECIP.filter(function(r){ return r.a; }).length +
+        (RECIP.filter(function(r){ return !r.a; }).length
+          ? ' <span class="sub">+'+RECIP.filter(function(r){ return !r.a; }).length+' retired</span>' : '') +
+      '</td><td class="sub">Releases of information · ROI presets · Referral packets</td></tr>' +
+      '</tbody></table></div>' +
+      '<div class="body" style="border-top:1px solid var(--line)"><p class="demonote">' +
+      'A value list stores a label. A directory stores a <b>record</b> — address, phone, fax, ' +
+      'contact — and everything that names it stores the ID. That is the difference between ' +
+      'fixing one wrong fax number and finding every release that has it.</p></div></div>';
+  }
+
+  function checkView(){
+    var list = scoped(clients);
+    var rows = [];
+    list.forEach(function(c){ c.docs.forEach(function(d){ rows.push({ c:c, d:d }); }); });
+    var order = { missing:0, past:1, today:2, soon:3 };
+    rows.sort(function(a,b){ return order[a.d.s]-order[b.d.s]; });
+
+    var n = function(s){ return rows.filter(function(r){ return r.d.s===s; }).length; };
+
+    return '<div class="kpis">' +
+      kpi('Missing', n('missing'), 'never started', 'bad') +
+      kpi('Past due', n('past'), 'overdue against config', 'bad') +
+      kpi('Due today', n('today'), '', 'warn') +
+      kpi('Due soon', n('soon'), 'next 7 days', '') +
+      kpi('Charts clear', list.filter(chartClean).length, 'of '+list.length+' on this caseload', 'good') +
+      '</div>' +
+      '<div class="card"><h2>' +
+      (state.scope==='mine' ? 'My to-do list' : 'Documentation status — all caseloads') +
+      '<div class="seg"><button type="button" data-scope="all" aria-pressed="'+(state.scope==='all')+
+      '">Everyone</button><button type="button" data-scope="mine" aria-pressed="'+(state.scope==='mine')+
+      '">My to-do</button></div></h2>' +
+      '<div class="body" style="border-bottom:1px solid var(--line); padding:10px 16px">' +
+      '<label class="sub">Counselor <select id="cselect"><option>All counselors</option>' +
+      COUNS.map(function(x){ return '<option'+(state.scope==='mine'&&x===ME?' selected':'')+'>'+x+'</option>'; }).join('') +
+      '</select></label> <span class="sub" style="margin-left:10px">Anyone can pull up another ' +
+      'counselor\'s list when covering.</span></div>' +
+      '<div class="tw" style="border:0;box-shadow:none"><table><thead><tr>' +
+      '<th>Client</th><th>Level</th><th>Counselor</th><th>Document</th><th>Due rule</th><th>Due</th><th>Status</th>' +
+      '</tr></thead><tbody>' +
+      (rows.length ? rows.slice(0,28).map(function(r){
+        return '<tr data-go="'+r.c.id+'"><td class="nm">'+name(r.c)+
+          ' <span class="sub mono">'+r.c.mrn+'</span></td>' +
+          '<td><span class="locchip" style="background:var('+r.c.loc.v+')">'+r.c.loc.label+'</span></td>' +
+          '<td>'+r.c.couns+'</td><td>'+r.d.t+'</td><td class="sub mono">'+r.d.w+'</td>' +
+          '<td class="mono">'+(r.d.s==='missing'?'—':r.d.due)+'</td>' +
+          '<td><span class="tag '+r.d.tone+'">'+r.d.label+'</span></td></tr>';
+      }).join('') : '<tr><td colspan="7" class="sub" style="padding:20px">Nothing outstanding on this caseload.</td></tr>') +
+      '</tbody></table></div>' +
+      '<div class="body" style="border-top:1px solid var(--line)">' +
+      '<p class="demonote">Documentation only — no billing here. Due dates come from tenant ' +
+      'configuration per document type and level of care, so “past due” means past <em>your</em> ' +
+      'deadline, not a guess.</p></div></div>';
+  }
+
+  function dischargedView(){
+    var rows = filtered();
+    var stuck = discharged.filter(function(c){ return !chartClean(c); }).length;
+    return '<div class="kpis">' +
+      kpi('Recently discharged', discharged.length, 'chart not yet closed', '') +
+      kpi('Blocked from closing', stuck, 'open documentation', stuck?'bad':'good') +
+      kpi('Ready to close', discharged.length-stuck, 'clean charts', 'good') +
+      '</div>' +
+      (state.layout==='cards' ? cards(rows) : table(rows)) +
+      '<div class="card" style="margin-top:14px"><div class="body">' +
+      '<p class="demonote">Discharge moves a client here <b>the moment it is entered, with a time</b> — ' +
+      'not at midnight. They stay until the chart is closed with nothing outstanding, so this list is ' +
+      'a worklist rather than a rolling archive, and the active census count is always true.</p></div></div>';
+  }
+
+  function kpi(l,v,d,cls){
+    return '<div class="kpi '+(cls||'')+'"><div class="l">'+l+'</div><div class="v">'+v+
+      '</div><div class="d">'+(d||'')+'</div></div>';
+  }
+
+  function financial(){
+    return '<div class="kpis">' +
+      kpi('Days billed this week','142','across 29 active charts','') +
+      kpi('Days under minimum','11','deviation note required','warn') +
+      kpi('Auths expiring ≤14 days','5','extension window open','warn') +
+      kpi('Claims blocked','7','unsigned or unresolved overlap','bad') +
+      '</div><div class="card"><h2>Census-level financial views</h2><div class="stub">' +
+      '<b>Not built in this study.</b>The same surfaces as the client Billing tab, across the whole ' +
+      'census instead of one chart.<div class="stublist">' +
+      '<div><b>Service hours</b>Every client, every day, against their level-of-care minimum.</div>' +
+      '<div><b>Authorizations</b>Units used and remaining, burn rate, projected exhaustion, extensions due.</div>' +
+      '<div><b>Claims</b>Submitted, paid, denied, and blocked — with the document that is blocking it.</div>' +
+      '</div></div></div>';
+  }
+
+  function reports(){
+    return '<div class="card"><h2>Reports</h2><div class="stub">' +
+      '<b>Not built in this study.</b>Where the shadow stack comes home. Each of these already exists ' +
+      'as a tool outside the EHR.<div class="stublist">' +
+      '<div><b>SHS QA report</b>Full parity with the current tool, run in-platform.</div>' +
+      '<div><b>Billing worklist</b>Charge and claim reconciliation without a companion spreadsheet.</div>' +
+      '<div><b>ARTS authorization tracking</b>The dashboard currently kept outside the EHR.</div>' +
+      '<div><b>Counselor rollup</b>Today an export plus a pivot table.</div>' +
+      '<div><b>Custom report builder</b>The one that matters — a QA director builds a view without it becoming a project.</div>' +
+      '</div></div></div>';
+  }
+
+  function render(){
+    document.querySelectorAll('#mainnav a').forEach(function(a){ a.classList.toggle('on', a.dataset.v===state.view); });
+    var isRoster = state.view==='census' || state.view==='discharged';
+    document.getElementById('tools').style.display = isRoster ? '' : 'none';
+    document.getElementById('colpop').style.display = state.layout==='table' ? '' : 'none';
+
+    var scopedClients = scoped(clients);
+    document.getElementById('checkbadge').textContent =
+      scopedClients.reduce(function(s,c){ return s+c.docs.length; },0);
+    document.getElementById('dcbadge').textContent = discharged.length;
+    document.getElementById('grpbadge').textContent =
+      SESSIONS.filter(function(s){ return s.status!=='signed'; }).length;
+    document.getElementById('schbadge').textContent = Object.keys(conflicts(state.week)).length/2;
+    document.getElementById('authbadge').textContent = uncoveredRows().length;
+    document.querySelectorAll('.seg button[data-scope]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.scope===state.scope));
+    });
+
+    var el = document.getElementById('view'), ct = document.getElementById('count');
+    if (isRoster) {
+      locFilters(); colSheet();
+      var rows = filtered();
+      ct.innerHTML = '<b>'+rows.length+'</b> '+(state.view==='discharged'?'recently discharged':'active clients')+
+        (state.scope==='mine' ? ' · your caseload' : ' · all caseloads') +
+        (state.loc!=='all' ? ' · '+LOCS.filter(function(L){return L.id===state.loc;})[0].full : '') +
+        (state.q ? ' · matching “'+state.q+'”' : '');
+      el.innerHTML = state.view==='discharged' ? dischargedView()
+                   : (state.layout==='cards' ? cards(rows) : table(rows));
+    } else {
+      ct.innerHTML = '';
+      el.innerHTML = state.view==='auth' ? (authView() + (state.aRule ? rulePanel() : '') + (state.aStat ? statusPanel() : ''))
+                   : state.view==='check' ? checkView()
+                   : state.view==='groups' ? groupsView()
+                   : state.view==='schedule' ? scheduleView()
+                   : state.view==='financial' ? financial()
+                   : state.view==='config' ? configView() : reports();
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a[data-v]');
+    if (a){ e.preventDefault(); state.view=a.dataset.v; state.loc='all'; state.usage=null; state.list=null; state.dir=null; state.drec=null; state.duse=null; render(); return; }
+    var lb = e.target.closest('[data-loc]');
+    if (lb){ state.loc=lb.dataset.loc; render(); return; }
+    if (e.target.id==='colbtn'){ e.stopPropagation();
+      document.getElementById('colpop').classList.toggle('on'); return; }
+    if (e.target.dataset && e.target.dataset.col!==undefined){
+      COLS[+e.target.dataset.col].on = e.target.checked; render();
+      document.getElementById('colpop').classList.add('on'); return; }
+    var pg = e.target.closest('[data-prog]');
+    if (pg){ state.prog = pg.dataset.prog; render(); return; }
+    var ff = e.target.closest('[data-ff]');
+    if (ff){ state.facFilter = ff.dataset.ff; render(); return; }
+    if (e.target.dataset && e.target.dataset.asamrm){
+      var ar = e.target.dataset.asamrm.split('|'), akp = ar[0].split('.');
+      var cur = asamOf(+akp[0], +akp[1]).filter(function(x){ return x!==ar[1]; });
+      asamOv[state.prog+'.'+ar[0]] = cur; render(); return; }
+    var aa = e.target.closest('[data-asamadd]');
+    if (aa){
+      e.stopPropagation();
+      var key = aa.dataset.asamadd, kp = key.split('.');
+      var on = asamOf(+kp[0], +kp[1]);
+      var m = document.createElement('div'); m.className='facmenu';
+      m.innerHTML = '<div class="hd">Add to ASAM duty</div>' + STAFF.filter(function(st){
+        return on.indexOf(st.n)<0; }).map(function(st){
+        return '<button type="button" data-asampick="'+key+'|'+st.n+'"><span class="facpill" style="background:'+
+          st.tint+';color:'+st.ink+'">'+st.n+'</span></button>'; }).join('');
+      var o=document.querySelector('.facmenu'); if(o) o.remove();
+      aa.parentNode.appendChild(m); return; }
+    if (e.target.dataset && e.target.dataset.asampick){
+      var ap = e.target.dataset.asampick.split('|'), apk = ap[0].split('.');
+      asamOv[state.prog+'.'+ap[0]] = asamOf(+apk[0], +apk[1]).concat([ap[1]]);
+      var fm3=document.querySelector('.facmenu'); if(fm3) fm3.remove();
+      render(); return; }
+    if (e.target.dataset && e.target.dataset.usage){
+      var ug = e.target.dataset.usage.split('|');
+      state.usage = { l:ug[0], i:+ug[1] }; render(); return; }
+    var rc = e.target.closest('[data-rule]');
+    if (rc){ e.stopPropagation(); state.aRule = rc.dataset.rule; render(); return; }
+    if (e.target.closest('[data-ruleclose]') || e.target.classList.contains('rulemodal')){
+      state.aRule = null; render(); return; }
+    var asb = e.target.closest('[data-asub]');
+    if (asb){ state.asub = asb.dataset.asub; state.aRec=null; state.aJump=null; render(); return; }
+    var apg = e.target.closest('[data-aprog]');
+    if (apg){ state.aProg = apg.dataset.aprog; state.aRec=null; render(); return; }
+    var acl = e.target.closest('[data-acols]');
+    if (acl){ state.aCols = acl.dataset.acols; render(); return; }
+    var ajp = e.target.closest('[data-jump]');
+    if (ajp){ state.aJump = ajp.dataset.jump; state.asub='main'; state.aRec=null; render(); return; }
+    var ajc = e.target.closest('[data-ajump]');
+    if (ajc){ state.aJump = null; render(); return; }
+    var aow = e.target.closest('[data-aowner]');
+    if (aow){ state.aOwner = aow.dataset.aowner; render(); return; }
+    var aas = e.target.closest('[data-aassign]');
+    if (aas){ e.stopPropagation();
+      var AS = auths.filter(function(x){ return x.id===aas.dataset.aassign; })[0];
+      AS.owner = ME; render();
+      flash('Assigned to you.');
+      return; }
+    var arc = e.target.closest('[data-arec]');
+    if (arc){ state.aRec = arc.dataset.arec; render(); return; }
+    if (e.target.closest('[data-aback]')){ state.aRec = null; render(); return; }
+
+    var dr = e.target.closest('[data-drec]');
+    if (dr){ state.drec = dr.dataset.drec; state.duse=null; state.dir='open'; render(); return; }
+    if (e.target.dataset && e.target.dataset.duse){
+      state.duse = e.target.dataset.duse; render(); return; }
+    var dd = e.target.closest('[data-dir]');
+    if (dd){ state.dir = dd.dataset.dir || null; state.drec=null; state.duse=null; render(); return; }
+    if (e.target.closest('[data-dadd]')){
+      var nid = 'D-'+String(RECIP.length+1).padStart(2,'0');
+      RECIP.push({ id:nid, t:'', org:'', attn:'', addr:'', city:'', st:'VA', zip:'',
+        phone:'', fax:'', email:'', a:true, pre:[], roi:0 });
+      state.dir='open'; state.drec=nid; state.duse=null; render();
+      flash('New recipient '+nid+'. Fill it in once; every release that names it points here.');
+      return; }
+    if (e.target.dataset && e.target.dataset.dtoggle){
+      var R = recip(e.target.dataset.dtoggle); R.a = !R.a; render();
+      flash(R.a ? 'Reinstated — available again when someone starts a release.'
+        : 'Retired — the '+R.roi+' release'+(R.roi===1?'':'s')+' on file still resolve; the name stops appearing on new ones.');
+      return; }
+
+    var vl = e.target.closest('[data-list]');
+    if (vl){ state.list = vl.dataset.list || null; state.addTo=null; state.usage=null; render(); return; }
+    if (e.target.dataset && e.target.dataset.vtoggle){
+      var vt = e.target.dataset.vtoggle.split('|'), LL = vlist(vt[0]);
+      LL.e[+vt[1]].a = !LL.e[+vt[1]].a; render();
+      flash(LL.e[+vt[1]].a ? 'Reinstated — it reappears in every picker that uses this list.'
+        : 'Retired — hidden from new entries, still resolving on existing records.');
+      return; }
+    var vab = e.target.closest('[data-vaddbtn]');
+    if (vab){ state.addTo = vab.dataset.vaddbtn; render();
+      var i2=document.querySelector('.noteinput'); if(i2) i2.focus(); return; }
+
+    var re = e.target.closest('[data-redit]');
+    if (re){ state.editRole = re.dataset.redit; state.editNote = null; render(); return; }
+    if (e.target.closest('[data-rclose]')){ state.editRole = null; render(); return; }
+    var ne = e.target.closest('[data-nedit]');
+    if (ne){ state.editNote = ne.dataset.nedit; state.editRole = null; render();
+      var inp = document.querySelector('.noteinput'); if (inp) inp.focus(); return; }
+
+    var ul = e.target.closest('[data-unlock]');
+    if (ul){
+      e.stopPropagation();
+      var uw = ul.dataset.unlock;
+      var m = document.createElement('div'); m.className='facmenu';
+      m.innerHTML = '<div class="hd">Reason — required</div>' +
+        ['Schedule not finalized before the week ran','Coverage change never entered',
+         'Correcting a data-entry error','Audit or billing reconciliation'].map(function(r){
+          return '<button type="button" data-ureason="'+uw+'|'+r+'">'+r+'</button>'; }).join('');
+      var o=document.querySelector('.facmenu'); if(o) o.remove();
+      ul.parentNode.appendChild(m); return; }
+    if (e.target.dataset && e.target.dataset.ureason){
+      var up = e.target.dataset.ureason.split('|');
+      unlocked[state.prog+'.'+up[0]] = up[1];
+      var fm4=document.querySelector('.facmenu'); if(fm4) fm4.remove();
+      render();
+      flash('Week unlocked for retroactive correction. Logged: who, when, and why.');
+      return; }
+    var rl = e.target.closest('[data-relock]');
+    if (rl){ delete unlocked[state.prog+'.'+rl.dataset.relock]; render();
+      flash('Week re-locked. The corrected version is now the one QA reads for those dates.'); return; }
+
+    var ws = e.target.closest('[data-wstep]');
+    if (ws){ state.week += +ws.dataset.wstep; render(); return; }
+    var wk = e.target.closest('[data-week]');
+    if (wk){ state.week = +wk.dataset.week; render(); return; }
+    var sv = e.target.closest('[data-sview]');
+    if (sv){ state.sview = sv.dataset.sview; render(); return; }
+    var cb = e.target.closest('[data-comb]');
+    if (cb){ var k = cb.dataset.comb;
+      if (combined[k]) delete combined[k]; else combined[k] = true;
+      render();
+      flash(combined[k] ? 'Groups combined for this slot — one facilitator, one roster, no conflict flag.'
+                        : 'Split back into Group 1 and Group 2.');
+      return; }
+    var fb = e.target.closest('[data-fac]');
+    if (fb){
+      e.stopPropagation();
+      var k = fb.dataset.fac, p = k.split('.');
+      var cur = facOf(+p[1],+p[2],+p[3],+p[4]);
+      var menu = document.createElement('div');
+      menu.className = 'facmenu';
+      menu.innerHTML = '<div class="hd">Reassign facilitator</div>' +
+        STAFF.map(function(st){
+          return '<button type="button" data-pick="'+k+'|'+st.n+'"'+(st.n===cur?' class="cur"':'')+'>'+
+            '<span class="facpill" style="background:'+st.tint+';color:'+st.ink+'">'+st.n+'</span>'+
+            (st.role==='intern'?' <span class="sub">· intern</span>':'')+'</button>';
+        }).join('');
+      var old = document.querySelector('.facmenu'); if (old) old.remove();
+      fb.parentNode.appendChild(menu);
+      return;
+    }
+    if (e.target.dataset && e.target.dataset.pick){
+      var parts = e.target.dataset.pick.split('|');
+      var kk = parts[0], f = parts[1], pp = kk.split('.');
+      if (f === baseFac(+pp[1],+pp[2],+pp[3],+pp[4])) delete schedOv[kk];
+      else schedOv[kk] = f;
+      var fm2 = document.querySelector('.facmenu'); if (fm2) fm2.remove();
+      render();
+      flash(f+' assigned. Attribution, signature authority, and what the QA report expects all moved with it.');
+      return;
+    }
+    var fm = document.querySelector('.facmenu'); if (fm && !e.target.closest('.facmenu')) fm.remove();
+
+    var sc = e.target.closest('[data-scope]');
+    if (sc){ state.scope = sc.dataset.scope; render(); return; }
+    var gs = e.target.closest('[data-gsub]');
+    if (gs){ state.gsub = gs.dataset.gsub; render(); return; }
+    var ses = e.target.closest('[data-session]');
+    if (ses){ flash(ses.dataset.session+' — opens the group note, roster prebuilt.'); return; }
+    document.getElementById('colpop').classList.remove('on');
+    var go = e.target.closest('[data-go]');
+    if (go){
+      var all = clients.concat(discharged);
+      var c = all.filter(function(x){ return x.id===go.dataset.go; })[0];
+      if (c) flash(name(c)+' — opens their client profile.');
+    }
+  });
+
+  document.querySelectorAll('.seg button[data-l]').forEach(function(b){
+    b.addEventListener('click', function(){
+      state.layout=b.dataset.l;
+      document.querySelectorAll('.seg button[data-l]').forEach(function(o){
+        o.setAttribute('aria-pressed', String(o===b)); });
+      render();
+    });
+  });
+  document.getElementById('q').addEventListener('input', function(){ state.q=this.value.trim(); render(); });
+  document.addEventListener('input', function(e){
+    if (e.target.id==='aq'){
+      state.aq = e.target.value.trim(); state.aRec=null; render();
+      var f = document.getElementById('aq'); if (f){ f.focus(); f.setSelectionRange(f.value.length,f.value.length); }
+    }
+  });
+
+  document.addEventListener('change', function(e){
+    if (e.target.dataset && e.target.dataset.rset){
+      var rp = e.target.dataset.rset.split('|');
+      setRole(rp[0], rp[1], e.target.value);
+      render(); return;
+    }
+    if (e.target.dataset && e.target.dataset.afac !== undefined){
+      state.aFac = e.target.value; state.aRec=null; render(); return; }
+    if (e.target.dataset && e.target.dataset.apend !== undefined){
+      PEND_COVERS = e.target.value === '1'; render();
+      flash(PEND_COVERS
+        ? 'A pending request now holds coverage. Those rows leave the uncovered count.'
+        : 'A pending request no longer holds coverage. Those days count as uncovered.');
+      return; }
+    if (e.target.dataset && e.target.dataset.aoff !== undefined){
+      DUE_OFFSET = +e.target.value; render();
+      flash('Due offset set to '+DUE_OFFSET+' days. Every due date and the QA check recomputed — no macro edit.');
+      return; }
+    if (e.target.dataset && e.target.dataset.p2p){
+      var PA = auths.filter(function(x){ return x.id===e.target.dataset.p2p; })[0];
+      PA.p2pNote = e.target.value; return; }
+    if (e.target.dataset && e.target.dataset.aown){
+      var AO = auths.filter(function(x){ return x.id===e.target.dataset.aown; })[0];
+      AO.owner = e.target.value || null; render();
+      flash(AO.owner ? 'Owner set to '+AO.owner+'.' : 'Unassigned — it returns to the unowned queue.');
+      return; }
+    if (e.target.dataset && e.target.dataset.dset){
+      var dp = e.target.dataset.dset.split('|'), DR = recip(dp[0]);
+      DR[dp[1]] = e.target.value.trim(); render();
+      flash('Saved on '+DR.id+'. Corrected in one place — presets and future releases follow.');
+      return;
+    }
+    if (e.target.dataset && e.target.dataset.vadd){
+      var lv = e.target.value.trim();
+      if (lv){ var L2 = vlist(e.target.dataset.vadd);
+        var pre = L2.e[0].id.split('-')[0];
+        L2.e.push({ id:pre+'-'+String(L2.e.length+1).padStart(2,'0'), l:lv, a:true, u:0 }); }
+      state.addTo = null; render();
+      if (lv) flash('Added. It is now available everywhere this list is referenced.');
+      return;
+    }
+    if (e.target.dataset && e.target.dataset.nset){
+      var val = e.target.value.trim();
+      if (val) DAYNOTES[e.target.dataset.nset] = val; else delete DAYNOTES[e.target.dataset.nset];
+      state.editNote = null; render(); return;
+    }
+    if (e.target.id === 'wjump'){
+      state.week = weekFromISO(e.target.value);
+      render();
+      flash('Jumped to the week of '+weekMeta(state.week).label+
+        (weekMeta(state.week).state==='historical' ? ' — historical, read-only.' : '.'));
+    }
+  });
+
+  function flash(msg){
+    var ct=document.getElementById('count');
+    ct.innerHTML='<b style="color:var(--accent)">'+msg+'</b>';
+    clearTimeout(flash.t); flash.t=setTimeout(render,2400);
+  }
+
+  render();
+})();
+</script>

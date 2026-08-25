@@ -71,6 +71,7 @@ export type Client = {
   phone: string
   email: string
   notes: string
+  flags: string[]
   is_active: boolean
   created_at: string
 }
