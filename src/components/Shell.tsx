@@ -8,15 +8,14 @@ const LIVE = [
 ]
 
 /**
- * The Phase 0 prototypes, served from public/prototypes and linked here so the
- * whole thing reads as one site. These still run on generated demo data — they
- * are the design spec, not yet wired to Supabase.
+ * The Phase 0 prototypes, served from public/prototypes. Census (above) already
+ * lands here, so it isn't repeated. These are quick jumps to the other three
+ * screens for the one real client on this tenant — not a separate demo track.
  */
 const PROTO = [
-  { file: 'census.html',        label: 'Groups & Schedule' },
   { file: 'group-note.html',    label: 'Group note' },
   { file: 'progress-note.html', label: 'Progress note' },
-  { file: 'client-chart.html',  label: 'Chart study' },
+  { file: 'client-chart.html',  label: 'Client chart' },
 ]
 
 const ADMIN = [
@@ -47,7 +46,7 @@ export default function Shell() {
           <span className="navsep" />
           {PROTO.map(p => (
             <a key={p.file} href={`${base}prototypes/${p.file}`}>
-              {p.label}<em>demo</em>
+              {p.label}
             </a>
           ))}
           <span className="navsep" />
