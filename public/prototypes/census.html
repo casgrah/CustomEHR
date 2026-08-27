@@ -2390,13 +2390,13 @@
     var gs = e.target.closest('[data-gsub]');
     if (gs){ state.gsub = gs.dataset.gsub; render(); return; }
     var ses = e.target.closest('[data-session]');
-    if (ses){ flash(ses.dataset.session+' — opens the group note, roster prebuilt.'); return; }
+    if (ses){ location.href = 'group-note.html'; return; }
     document.getElementById('colpop').classList.remove('on');
     var go = e.target.closest('[data-go]');
     if (go){
       var all = clients.concat(discharged);
       var c = all.filter(function(x){ return x.id===go.dataset.go; })[0];
-      if (c) flash(name(c)+' — opens their client profile.');
+      if (c) location.href = 'client-chart.html';
     }
   });
 
