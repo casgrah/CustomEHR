@@ -60,6 +60,9 @@
   .app input[type=text] { font-family:inherit; font-size:13px; padding:6px 11px; border-radius:5px; width:200px;
     border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.12); color:#fff; margin-left:auto; }
   .app input[type=text]::placeholder { color:var(--chrome-dim); }
+  .app .addbtn { font-family:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:5px;
+    border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.12); color:#fff; white-space:nowrap; }
+  .app .addbtn:hover { background:rgba(255,255,255,.22); }
   .mainnav { background:var(--chrome-hi); border-bottom:1px solid rgba(0,0,0,.28); }
   .mainnav .wrap { display:flex; overflow-x:auto; padding:0 18px; }
   .mainnav a { padding:11px 16px; color:var(--chrome-dim); font-size:13.5px; font-weight:600;
@@ -352,7 +355,8 @@
   <div class="wrap">
     <div class="brand">Alder Creek Recovery <span>Cardinal Care</span></div>
     <input type="text" id="q" placeholder="Search name or MRN…">
-    <div class="me" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--chrome-dim)">
+    <a class="addbtn" href="../clients/new">+ Add client</a>
+    <div class="me" id="whoami" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--chrome-dim)">
       Signed in as <b style="color:var(--chrome-ink);font-weight:600">D. Reyes, CSAC</b>
     </div>
   </div>
@@ -406,8 +410,9 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-(function(){
+(async function(){
   var seed = 20260819;
   function rnd(){ seed = (seed*1103515245 + 12345) % 2147483648; return seed/2147483648; }
   function pick(a){ return a[Math.floor(rnd()*a.length)]; }
@@ -520,6 +525,69 @@
   }];
 
   var discharged = [];
+
+  var SUPABASE_URL = 'https://tecmdmetsdgtewaszzxv.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_5fsFQdWwFhEdN_u5D7ISyA_aqB7M0pe';
+  var LOC_BY_CODE = { '2.5':'php', '2.1':'iop', '3.5':'r35', '3.1':'r31', '1.0':'op' };
+
+  /* Live data: any client added through the real app's "Add client" form shows up
+     here too, alongside the illustrated seed client above. A newly added client
+     starts with no flags or chart-check items — those get earned by real
+     documentation, never faked in. See build-phase-1.md. */
+  try {
+    if (window.supabase) {
+      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      var sessRes = await sb.auth.getSession();
+      var user = sessRes && sessRes.data && sessRes.data.session ? sessRes.data.session.user : null;
+      if (user) {
+        var meRes = await sb.from('profiles').select('full_name, credential, tenant_id, role').eq('id', user.id).single();
+        var me = meRes && meRes.data;
+        if (me) {
+          var tRes = await sb.from('tenants').select('name').eq('id', me.tenant_id).single();
+          var tname = tRes && tRes.data && tRes.data.name;
+          var brandEl = document.querySelector('.app .brand');
+          if (brandEl && tname) brandEl.innerHTML = tname + ' <span>Sandbox</span>';
+          var meEl = document.querySelector('#whoami b');
+          if (meEl) meEl.textContent = me.full_name + (me.credential ? ', ' + me.credential : '');
+          if (me.role === 'owner' || me.role === 'admin') {
+            var whoami = document.getElementById('whoami');
+            if (whoami) whoami.insertAdjacentHTML('beforebegin', '<a class="addbtn" href="../users">Users</a>');
+          }
+        }
+        var staffRes = await sb.from('profiles').select('id, full_name, credential').eq('is_active', true);
+        var staffById = {};
+        (staffRes && staffRes.data || []).forEach(function(p){ staffById[p.id] = p; });
+        var rowsRes = await sb.from('clients').select('*, episodes(*)').eq('is_active', true).order('last_name');
+        var liveRows = (rowsRes && rowsRes.data) || [];
+        liveRows.forEach(function(r){
+          if (r.mrn === '0001') return; // the illustrated seed client above — same person, don't duplicate
+          var open = (r.episodes || []).filter(function(e){ return !e.discharge_date; })[0];
+          var loc = LOCS.filter(function(L){ return L.id === LOC_BY_CODE[open ? open.level_of_care : '']; })[0] || LOCS[0];
+          var counselor = open && open.primary_counselor ? staffById[open.primary_counselor] : null;
+          var admitDate = open ? new Date(open.admit_date + 'T00:00:00') : null;
+          var los = admitDate ? Math.max(0, Math.round((Date.now() - admitDate.getTime()) / 86400000)) : 0;
+          var dob = r.dob ? new Date(r.dob + 'T00:00:00') : null;
+          var age = dob ? Math.floor((Date.now() - dob.getTime()) / 315576000000) : '—';
+          clients.push({
+            id: r.id,
+            first: r.preferred_name || r.first_name, last: r.last_name, mrn: r.mrn,
+            dob: dob ? pad(dob.getMonth()+1)+'/'+pad(dob.getDate())+'/'+String(dob.getFullYear()).slice(2) : '—',
+            age: age,
+            loc: loc,
+            couns: counselor ? counselor.full_name : 'Unassigned',
+            peer: '—', cm: '—',
+            payer: r.payer || '—',
+            admit: admitDate ? pad(admitDate.getMonth()+1)+'/'+pad(admitDate.getDate())+'/'+admitDate.getFullYear() : '—',
+            los: los,
+            projDC: '—', authDue: '—',
+            hue: HUES[clients.length % HUES.length],
+            flags: [], docs: [],
+            dc: null, track: 'Standard'
+          });
+        });
+      }
+    }
+  } catch (e) { console.warn('live client data unavailable, showing seed data only', e); }
 
   var ME = 'Reyes, CSAC';
   function name(c){ return c.last+', '+c.first; }
