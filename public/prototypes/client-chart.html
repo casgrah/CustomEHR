@@ -337,25 +337,23 @@
 
   <header class="idbar">
     <div style="flex:1 1 300px; min-width:0;">
-      <h1>Whitfield, Marcus D.</h1>
+      <h1>Smith, Claudeus</h1>
       <div class="facts">
-        <span>MRN <b class="mono">004821</b></span>
-        <span>DOB <b class="mono">03/14/1987</b> (39)</span>
-        <span>He/him</span>
-        <span>SSN <b class="mono">•••–••–4102</b></span>
+        <span>MRN <b class="mono">0001</b></span>
+        <span>DOB <b class="mono">04/01/1985</b> (41)</span>
+        <span>SSN <b class="mono">•••–••–7731</b></span>
       </div>
       <div class="facts" style="margin-top:7px; align-items:center;">
         <span class="chip loc">ASAM 2.5 · PHP</span>
-        <span class="chip ep-open" id="epchip">Episode 2 · Open</span>
-        <span>Admitted <b class="mono">07/28/2026</b> · Day 24 · Riverside Bldg B</span>
+        <span class="chip ep-open" id="epchip">Episode 1 · Open</span>
+        <span>Admitted <b class="mono">08/25/2026</b> · Day 2 · Building A</span>
       </div>
     </div>
     <div class="hdrblock">
       <div class="lbl">Diagnoses</div>
       <div class="val">
-        <span class="mono">F11.20</span> Opioid use disorder, severe<br>
-        <span class="mono">F33.1</span> MDD, recurrent, moderate<br>
-        <span class="mono">F17.210</span> Nicotine dependence
+        <span class="mono">F10.20</span> Alcohol use disorder, severe<br>
+        <span class="mono">F41.1</span> Generalized anxiety disorder
       </div>
     </div>
     <div class="hdrblock danger">
@@ -450,42 +448,37 @@
   P.face = head('Face Sheet') +
     '<div class="cols"><div class="stack">' +
     '<section class="card"><h2>Demographics <a href="#edit">Edit</a></h2><div class="body"><div class="fields">' +
-      f('Legal name','Marcus Dwayne Whitfield')+f('Preferred name','Marc')+
-      f('Date of birth','<span class="mono">03/14/1987</span>')+f('Age','<span class="mono">39</span>')+
-      f('Gender','Male · He/him')+f('Race / ethnicity','Black or African American · Not Hispanic')+
-      f('SSN','<span class="mono">•••–••–4102</span>')+f('Phone','<span class="mono">(804) 555–0173</span>')+
-      f('Address','1408 Fielder St, Apt 3<br>Richmond, VA 23220')+f('Preferred contact','Text message')+
+      f('Legal name','Claudeus Smith')+
+      f('Date of birth','<span class="mono">04/01/1985</span>')+f('Age','<span class="mono">41</span>')+
+      f('SSN','<span class="mono">•••–••–7731</span>')+f('Phone','<span class="mono">(804) 555–0117</span>')+
+      f('Address','212 Bellwood Ave<br>Richmond, VA 23224')+f('Preferred contact','Text message')+
     '</div></div></section>' +
     '<section class="card"><h2>Episode &amp; level of care</h2><div class="body"><div class="fields">' +
-      f('Current LOC','ASAM 2.5 — Partial Hospitalization')+f('Admitted','<span class="mono">07/28/2026</span>')+
-      f('Episode state','Open · Episode 2 of 2')+f('Location','Riverside Campus — Bldg B')+
-      f('Service auth','Approved thru <span class="mono">09/25/2026</span>')+
-      f('ISP review due','<span class="mono">08/27/2026</span>')+
+      f('Current LOC','ASAM 2.5 — Partial Hospitalization')+f('Admitted','<span class="mono">08/25/2026</span>')+
+      f('Episode state','Open · Episode 1 of 1')+f('Location','Building A')+
+      f('Service auth','Approved thru <span class="mono">09/08/2026</span>')+
+      f('ISP review due','<span class="mono">09/24/2026</span>')+
     '</div><div class="actions" style="margin-top:var(--gap)">' +
       '<a class="btn" href="#transfer">Transfer level of care</a><a class="btn" href="#discharge">Discharge</a>' +
       '<a class="btn" href="#history">Episode history</a></div></div></section>' +
     '<section class="card"><h2>Diagnoses on chart</h2><div class="list">' +
-      row('<span class="mono" style="color:var(--accent)">F11.20</span> Opioid use disorder, severe <span class="sub">— principal</span>','07/28/2026 · Okonkwo, MD')+
-      row('<span class="mono" style="color:var(--accent)">F33.1</span> Major depressive disorder, recurrent, moderate','07/28/2026 · Okonkwo, MD')+
-      row('<span class="mono" style="color:var(--accent)">F17.210</span> Nicotine dependence, cigarettes','08/04/2026 · Reyes, CSAC')+
+      row('<span class="mono" style="color:var(--accent)">F10.20</span> Alcohol use disorder, severe <span class="sub">— principal</span>','08/25/2026 · Okonkwo, MD')+
+      row('<span class="mono" style="color:var(--accent)">F41.1</span> Generalized anxiety disorder','08/25/2026 · Okonkwo, MD')+
     '</div></section>' +
     '</div><div class="stack">' +
     '<section class="card"><h2>Coverage</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
-      f('Plan','Anthem HealthKeepers Plus<br><span class="sub">Cardinal Care · Medicaid MCO</span>')+
-      f('Member ID','<span class="mono">YHA804291733</span>')+
-      f('Authorization','SA <span class="mono">#A-77213</span> · thru <span class="mono">09/25/2026</span>')+
+      f('Plan','Anthem HealthKeepers<br><span class="sub">Medicaid MCO</span>')+
+      f('Member ID','<span class="mono">123456789</span>')+
+      f('Authorization','SA <span class="mono">#A-11042</span> · thru <span class="mono">09/08/2026</span>')+
     '</div></div></section>' +
     '<section class="card"><h2>Care team</h2><div class="list">' +
-      row('<b>Dana Reyes, CSAC</b><br><span class="sub">Primary counselor</span>','Since 07/28')+
-      row('<b>Priya Okonkwo, MD</b><br><span class="sub">Addiction medicine</span>','Since 07/28')+
-      row('<b>Tomás Iyer</b><br><span class="sub">Case manager</span>','Since 07/30')+
-      row('<b>Renee Hollis, CPRS</b><br><span class="sub">Peer recovery specialist</span>','Since 08/03')+
-      row('<b>Alan Brody, LCSW</b><br><span class="sub">Clinical supervisor</span>','Since 07/28')+
+      row('<b>Caitlin Srock-Graham</b><br><span class="sub">Primary counselor</span>','Since 08/25')+
+      row('<b>Priya Okonkwo, MD</b><br><span class="sub">Addiction medicine</span>','Since 08/25')+
+      row('<b>Tomás Iyer</b><br><span class="sub">Case manager</span>','Since 08/25')+
     '</div></section>' +
     '<section class="card"><h2>Emergency contact</h2><div class="body"><div class="fields" style="grid-template-columns:1fr">' +
-      f('Primary','Lorraine Whitfield — mother<br><span class="mono">(804) 555–0288</span>')+
-      f('ROI on file','Yes · expires <span class="mono">01/28/2027</span>')+
-      f('Secondary','Devon Whitfield — brother<br><span class="mono">(804) 555–0341</span>')+
+      f('Primary','Renee Smith — sister<br><span class="mono">(804) 555–0142</span>')+
+      f('ROI on file','Yes · expires <span class="mono">08/25/2027</span>')+
     '</div></div></section>' +
     '</div></div>';
 
@@ -859,12 +852,12 @@
   ];
 
   var rois = [
-    { title:'Release of Information: Emergency Contact — Lorraine Whitfield',
-      to:'Lorraine Whitfield (mother)', signed:'07/28/2026', exp:'07/28/2027', st:'active' },
+    { title:'Release of Information: Emergency Contact — Renee Smith',
+      to:'Renee Smith (sister)', signed:'08/25/2026', exp:'08/25/2027', st:'active' },
     { title:'Release of Information: Hospital — VCU Medical Center',
-      to:'VCU Medical Center', signed:'07/28/2026', exp:'07/28/2027', st:'active' },
+      to:'VCU Medical Center', signed:'08/25/2026', exp:'08/25/2027', st:'active' },
     { title:'Release of Information: Referral — Southside Primary Care',
-      to:'Southside Primary Care', signed:'07/29/2026', exp:'07/29/2027', st:'active' },
+      to:'Southside Primary Care', signed:'08/26/2026', exp:'08/26/2027', st:'active' },
     { title:'Release of Information: Hospital — Chippenham Hospital',
       to:'Chippenham Hospital', signed:'02/14/2025', exp:'02/14/2026', st:'expired' }
   ];

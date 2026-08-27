@@ -496,18 +496,30 @@
     };
   }
 
-  var clients = [];
-  for (var i=0;i<38;i++) clients.push(mkClient(i));
+  /* Real sandbox data: the one client Caitlin added through the live app,
+     built out here to show an example of every mapped feature — a missing
+     group note, an unsigned individual note, a do-not-bill flag — rather than
+     a fictional roster. See build-phase-1.md: the prototypes are the spec,
+     the live app is the source; this keeps them the same client. */
+  var clients = [{
+    id:'c0', first:'Claudeus', last:'Smith', mrn:'0001',
+    dob:'04/01/85', age:41,
+    loc:LOCS[0], couns:'Srock-Graham', peer:pick(PEERS), cm:pick(CMS),
+    payer:'Anthem HealthKeepers',
+    admit:'08/25/2026', los:2,
+    projDC:'10/10/2026', authDue:'09/08/2026',
+    hue:HUES[0],
+    flags:[ FLAGS.filter(function(f){return f.c==='DNB';})[0],
+            FLAGS.filter(function(f){return f.c==='SAFE';})[0] ],
+    docs:[
+      { t:'Unsigned group note',        w:'1 bus day', s:'missing', label:'Missing',  tone:'bad',  due:'08/27/26' },
+      { t:'Unsigned individual note',   w:'1 bus day', s:'past',    label:'Past due', tone:'bad',  due:'08/26/26' },
+      { t:'30-day ISP review',          w:'cycle',     s:'today',   label:'Due today',tone:'warn', due:'08/27/26' }
+    ],
+    dc:null, track:'Standard'
+  }];
 
   var discharged = [];
-  for (var d=0; d<9; d++){
-    var c = clients.pop();
-    c.dc = '08/'+pad(2+Math.floor(rnd()*17))+'/2026';
-    c.dcTime = pad(9+Math.floor(rnd()*8))+':'+pick(['00','15','30','45']);
-    c.dcReason = pick(['Completed treatment','Stepped down to IOP','Stepped down to OP',
-      'Left against advice','Administrative discharge','Transferred — higher level']);
-    discharged.push(c);
-  }
 
   var ME = 'Reyes, CSAC';
   function name(c){ return c.last+', '+c.first; }
