@@ -6,6 +6,8 @@ import ClientNew from './pages/ClientNew'
 import ClientChart from './pages/ClientChart'
 import Users from './pages/Users'
 import Configure from './pages/Configure'
+import Forms from './pages/Forms'
+import FormEditor from './pages/FormEditor'
 
 /**
  * Landing after sign-in. The prototype census page (public/prototypes/census.html)
@@ -41,6 +43,8 @@ export default function App() {
         <Route path="/clients/:id" element={<ClientChart />} />
         <Route path="/users" element={<Users />} />
         <Route path="/configure" element={<Configure />} />
+        <Route path="/forms" element={<Forms />} />
+        <Route path="/forms/:id" element={<FormEditor />} />
         <Route path="*" element={<GoToCensusPrototype />} />
       </Route>
     </Routes>

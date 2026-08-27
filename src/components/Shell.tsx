@@ -5,6 +5,7 @@ import { useSession } from '../lib/session'
 const LIVE = [
   { to: '/census', label: 'Census' },
   { to: '/clients/new', label: 'Add client' },
+  { to: '/forms', label: 'Forms' },
 ]
 
 /**

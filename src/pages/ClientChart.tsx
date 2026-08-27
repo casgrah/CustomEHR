@@ -3,15 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../lib/session'
 import { Avatar, Card, Empty, Field, LocTag, Msg, Tag, fmtDate, daysBetween } from '../components/ui'
-import type { Client, Episode, Facility, Profile, ValueListItem } from '../types'
+import { CHART_SECTIONS } from '../chartSections'
+import type { Client, Episode, Facility, FormTemplate, Profile, ValueListItem } from '../types'
 
 /** The section list settled in the prototypes. Only Overview is built. */
-const SECTIONS = [
-  { g: 'Overview',      items: ['Face sheet', 'Needs attention', 'Consents', 'Releases of information'] },
-  { g: 'Documentation', items: ['Clinical', 'Medical / nursing', 'Peer', 'Case management', 'Group notes', 'Assessments'] },
-  { g: 'Care plan',     items: ['Problems & objectives', 'ISP', '30-day reviews'] },
-  { g: 'Billing',       items: ['Service hours', 'Authorizations', 'Claims', 'Do not bill'] },
-]
+const SECTIONS = CHART_SECTIONS
 
 export default function ClientChart() {
   const { id } = useParams()
@@ -22,6 +18,7 @@ export default function ClientChart() {
   const [reasons, setReasons] = useState<ValueListItem[]>([])
   const [facilities, setFacilities] = useState<Facility[]>([])
   const [staff, setStaff] = useState<Profile[]>([])
+  const [forms, setForms] = useState<FormTemplate[]>([])
   const [err, setErr] = useState('')
   const [adding, setAdding] = useState(false)
   const [newEp, setNewEp] = useState({
@@ -57,6 +54,12 @@ export default function ClientChart() {
     setFacilities((fac as Facility[]) ?? [])
     const { data: st } = await supabase.from('profiles').select('*')
     setStaff((st as Profile[]) ?? [])
+    const { data: ft } = await supabase.from('form_templates').select('*').eq('is_active', true)
+    setForms((ft as FormTemplate[]) ?? [])
+  }
+
+  function formsFor(g: string, item: string) {
+    return forms.filter(f => (f.placements ?? []).some(p => p.g === g && p.item === item))
   }
 
   const locLabel = (code: string) => locs.find(l => l.code === code)?.label ?? code
@@ -192,18 +195,29 @@ export default function ClientChart() {
       </Card>
 
       <Card title="Chart sections"
-            note="The section list is settled; the screens behind them are not built yet. Each one is a slice to port from the prototypes — group note, progress note, care plan, authorizations.">
+            aside={<Link className="btn small" to="/forms">Forms</Link>}
+            note="The section list is settled; most screens behind it aren't built yet. A form placed on a section (from Forms) shows up here now — that's real; the rest of each screen is still a slice to port from the prototypes.">
         <div className="body">
           <div className="fields" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))' }}>
             {SECTIONS.map(s => (
               <div key={s.g}>
                 <div style={{ fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase',
                               color: 'var(--ink-faint)', fontWeight: 700, marginBottom: 5 }}>{s.g}</div>
-                {s.items.map(i => (
-                  <div key={i} className="sub" style={{ padding: '3px 0' }}>
-                    {i} <Tag tone="mute">not built</Tag>
-                  </div>
-                ))}
+                {s.items.map(i => {
+                  const placed = formsFor(s.g, i)
+                  return (
+                    <div key={i} className="sub" style={{ padding: '3px 0' }}>
+                      {i}{' '}
+                      {placed.length === 0
+                        ? <Tag tone="mute">not built</Tag>
+                        : placed.map(f => (
+                            <Link key={f.id} to={`/forms/${f.id}`} className="tag info" style={{ marginRight: 4 }}>
+                              {f.name}
+                            </Link>
+                          ))}
+                    </div>
+                  )
+                })}
               </div>
             ))}
           </div>

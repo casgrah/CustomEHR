@@ -94,3 +94,31 @@ export const LOC_COLOR: Record<string, string> = {
   '2.5': 'var(--loc-a)', '2.1': 'var(--loc-b)', '3.5': 'var(--loc-c)',
   '3.1': 'var(--loc-d)', '1.0': 'var(--loc-e)',
 }
+
+// ---------------------------------------------------------------- forms ---
+// See supabase/migrations/0003_forms.sql. A template's whole shape is this
+// block array — adding or changing a form is a row write, never a migration.
+
+export type TextSize = 'sm' | 'md' | 'lg' | 'xl'
+
+export type FormBlock =
+  | { id: string; type: 'header'; text: string; size: TextSize }
+  | { id: string; type: 'text'; text: string; size: TextSize }
+  | { id: string; type: 'field'; label: string; placeholder: string; fieldType: 'text' | 'textarea' | 'date' }
+  | { id: string; type: 'checkbox'; label: string }
+  | { id: string; type: 'section'; title: string; collapsible: boolean; defaultOpen: boolean }
+  | { id: string; type: 'image'; url: string; alt: string; width: 'sm' | 'md' | 'lg' | 'full' }
+  | { id: string; type: 'divider' }
+
+export type FormTemplate = {
+  id: string
+  tenant_id: string
+  name: string
+  schema: FormBlock[]
+  placements: { g: string; item: string }[]
+  version: number
+  is_active: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
